@@ -38,12 +38,12 @@ A hatékony párhuzamos munkavégzés érdekében a feladatokat képernyők és 
 **Felelősségi körök:** A meglévő feladatok megjelenítése és a kategóriarendszer kezelése.
 * **Dashboard:** A főképernyő felépítése, a komplex lista elemek (kártyák) leprogramozása a tervek alapján (címkékkel, határidőkkel, checkbox-szal).
 * **Szűrés/Lista logika:** A felső statisztikai számlálók (Finished, Unfinished, Total) logikája, adatok lekérése (GET) az API-ból.
-* **Manage Categories oldal:** Az egyedi kategóriák kezelését (létrehozás, listázás, törlés) végző UI elkészítése és az ehhez tartozó API hívások bekötése.
 
 ### Szappanos Szabolcs: "Forms, Sharing & Permissions" (Űrlapok és Jogosultságok)
 **Felelősségi körök:** Új tartalmak létrehozása és a megosztási logika implementálása.
 * **New Todo oldal:** A feladat létrehozó/szerkesztő űrlap elkészítése (cím, leírás, határidő/idő választó dialogok, prioritás legördülő menü). Csatlakozás (POST/PUT) az API-hoz.
 * **Manage Shares oldal:** A megosztási felület UI-ja, felhasználók hozzáadása email alapján.
+* **Manage Categories oldal:** A kategóriák kezelését (létrehozás, listázás, törlés) végző UI elkészítése és az ehhez tartozó API hívások bekötése.
 * **Jogosultság-kezelés:** A jogosultsági szintek (Owner, Manage, Write, Read) legördülő menüjének kezelése, és a módosítási lehetőségek UI szintű letiltása, ha a felhasználónak nincs joga szerkeszteni.
 
 ### Marosi Róbert: "Statistics & Visualization" (Statisztika és Vizualizáció)
