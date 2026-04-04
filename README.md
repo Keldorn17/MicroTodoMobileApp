@@ -34,8 +34,8 @@ A hatékony párhuzamos munkavégzés érdekében a feladatokat képernyők és 
 * **Autentikáció:** Keycloak login/logout folyamat integrálása, tokenek biztonságos tárolása és csatolása az API hívásokhoz.
 * **Settings (Beállítások) oldal:** A Settings felület lefejlesztése, a téma váltás globális logikájának megírása, profil beállítások alapjai.
 
-### Patai Zoltán: "Dashboard & Categories" (Listázás és Kategóriák)
-**Felelősségi körök:** A meglévő feladatok megjelenítése és a kategóriarendszer kezelése.
+### Patai Zoltán: "Dashboard & Todo Cards" (Listázás és Todo Kártyák)
+**Felelősségi körök:** A meglévő feladatok megjelenítése és a kártyák létrehozása.
 * **Dashboard:** A főképernyő felépítése, a komplex lista elemek (kártyák) leprogramozása a tervek alapján (címkékkel, határidőkkel, checkbox-szal).
 * **Szűrés/Lista logika:** A felső statisztikai számlálók (Finished, Unfinished, Total) logikája, adatok lekérése (GET) az API-ból.
 
