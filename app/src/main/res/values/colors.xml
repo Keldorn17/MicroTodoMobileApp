@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Light Theme Colors (Daisy UI Default) -->
+    <color name="daisy_light_primary">#422ad5</color>
+    <color name="daisy_light_primary_content">#e0e7ff</color>
+    <color name="daisy_light_secondary">#f43098</color>
+    <color name="daisy_light_secondary_content">#f9e4f0</color>
+    <color name="daisy_light_accent">#00d3bb</color>
+    <color name="daisy_light_accent_content">#084d49</color>
+    <color name="daisy_light_neutral">#09090b</color>
+    <color name="daisy_light_neutral_content">#e4e4e7</color>
+    <color name="daisy_light_base_100">#ffffff</color>
+    <color name="daisy_light_base_200">#f8f8f8</color>
+    <color name="daisy_light_base_300">#eeeeee</color>
+    <color name="daisy_light_base_content">#18181b</color>
+
+    <!-- Dark Theme Colors (Dracula) -->
+    <color name="daisy_dark_primary">#ff79c6</color>
+    <color name="daisy_dark_primary_content">#16050e</color>
+    <color name="daisy_dark_secondary">#bd93f9</color>
+    <color name="daisy_dark_secondary_content">#0d0815</color>
+    <color name="daisy_dark_accent">#ffb86c</color>
+    <color name="daisy_dark_accent_content">#160d04</color>
+    <color name="daisy_dark_neutral">#414558</color>
+    <color name="daisy_dark_neutral_content">#f8f8f2</color>
+    <color name="daisy_dark_base_100">#282a36</color>
+    <color name="daisy_dark_base_200">#232530</color>
+    <color name="daisy_dark_base_300">#1f202a</color>
+    <color name="daisy_dark_base_content">#f8f8f3</color>
+    <color name="daisy_dark_error">#ff5555</color>
+    <color name="daisy_dark_error_content">#160202</color>
+    
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

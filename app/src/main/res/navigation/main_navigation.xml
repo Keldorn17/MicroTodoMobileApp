@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_navigation"
+    app:startDestination="@id/ownTodoListFragment">
+
+    <fragment
+        android:id="@+id/ownTodoListFragment"
+        android:name="hu.nje.todo.todo.presentation.fragment.TodoListFragment"
+        android:label="fragment_todo_list"
+        tools:layout="@layout/fragment_todo_list">
+        <argument
+            android:name="queryMode"
+            app:argType="hu.nje.todo.todo.domain.model.QueryMode"
+            android:defaultValue="OWN" />
+    </fragment>
+    <fragment
+        android:id="@+id/sharedTodoListFragment"
+        android:name="hu.nje.todo.todo.presentation.fragment.TodoListFragment"
+        android:label="fragment_todo_list"
+        tools:layout="@layout/fragment_todo_list">
+        <argument
+            android:name="queryMode"
+            app:argType="hu.nje.todo.todo.domain.model.QueryMode"
+            android:defaultValue="SHARED" />
+    </fragment>
+    <fragment
+        android:id="@+id/allTodoListFragment"
+        android:name="hu.nje.todo.todo.presentation.fragment.TodoListFragment"
+        android:label="fragment_todo_list"
+        tools:layout="@layout/fragment_todo_list">
+        <argument
+            android:name="queryMode"
+            app:argType="hu.nje.todo.todo.domain.model.QueryMode"
+            android:defaultValue="ALL" />
+    </fragment>
+    <fragment
+        android:id="@+id/todoStatisticsFragment"
+        android:name="hu.nje.todo.todo.presentation.fragment.TodoStatisticsFragment"
+        android:label="fragment_todo_statistics"
+        tools:layout="@layout/fragment_todo_statistics" />
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="hu.nje.todo.todo.presentation.fragment.SettingsFragment"
+        android:label="fragment_settings"
+        tools:layout="@layout/fragment_settings" />
+    <fragment
+        android:id="@+id/todoEditorFragment"
+        android:name="hu.nje.todo.todo.presentation.fragment.TodoEditorFragment"
+        android:label="fragment_todo_editor"
+        tools:layout="@layout/fragment_todo_editor" />
+</navigation>
