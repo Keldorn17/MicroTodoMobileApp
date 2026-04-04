@@ -1,0 +1,10 @@
+{
+  "authEndpoint": "https://auth.robottx.hu/realms/applications/protocol/openid-connect/auth",
+  "registrationEndpoint": "https://auth.robottx.hu/realms/applications/protocol/openid-connect/registrations",
+  "tokenEndpoint": "https://auth.robottx.hu/realms/applications/protocol/openid-connect/token",
+  "clientId": "todo-service-mobile",
+  "redirectUri": "hu.robottx.todo:/oauth2callback",
+  "scopes": "openid profile email offline_access",
+  "profileEndpoint": "https://auth.robottx.hu/realms/applications/account/",
+  "endSessionEndpoint": "https://auth.robottx.hu/realms/applications/protocol/openid-connect/logout"
+}
