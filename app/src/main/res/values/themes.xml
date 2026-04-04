@@ -1,0 +1,27 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.TodoApp" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <item name="colorPrimary">@color/daisy_light_primary</item>
+        <item name="colorOnPrimary">@color/daisy_light_primary_content</item>
+        <item name="colorSecondary">@color/daisy_light_secondary</item>
+        <item name="colorOnSecondary">@color/daisy_light_secondary_content</item>
+        <item name="colorTertiary">@color/daisy_light_accent</item>
+        <item name="colorOnTertiary">@color/daisy_light_accent_content</item>
+        <item name="android:colorBackground">@color/daisy_light_base_200</item>
+        <item name="colorOnBackground">@color/daisy_light_base_content</item>
+        <item name="colorSurface">@color/daisy_light_base_100</item>
+        <item name="colorOnSurface">@color/daisy_light_base_content</item>
+        <item name="colorPrimaryContainer">@color/daisy_light_primary</item>
+        <item name="colorOnPrimaryContainer">@color/daisy_light_primary_content</item>
+        <item name="colorSecondaryContainer">@color/daisy_light_secondary</item>
+        <item name="colorOnSecondaryContainer">@color/daisy_light_secondary_content</item>
+        <item name="colorTertiaryContainer">@color/daisy_light_accent</item>
+        <item name="colorOnTertiaryContainer">@color/daisy_light_accent_content</item>
+        <item name="colorSurfaceVariant">@color/daisy_light_base_200</item>
+        <item name="colorOnSurfaceVariant">@color/daisy_light_base_content</item>
+        <item name="colorSurfaceContainer">@color/daisy_light_base_100</item>
+    </style>
+
+    <style name="Theme.TodoApp" parent="Base.Theme.TodoApp" />
+</resources>
