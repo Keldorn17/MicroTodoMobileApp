@@ -10,23 +10,26 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import hu.nje.todo.todo.domain.model.QueryMode;
 import hu.nje.todo.todo.domain.model.TodoRequest;
 import hu.nje.todo.todo.domain.model.TodoResponse;
+import hu.nje.todo.todo.domain.model.TodoUpdateRequest;
 import hu.nje.todo.todo.domain.repository.TodoRepository;
 import hu.nje.todo.todo.domain.usecase.GetTodosUseCase;
+import hu.nje.todo.todo.domain.usecase.PatchTodoUseCase;
 
 @HiltViewModel
 public class TodoListViewModel extends ViewModel {
 
     private final GetTodosUseCase getTodosUseCase;
+    private final PatchTodoUseCase patchTodoUseCase;
 
     private final MutableLiveData<TodoResponse> todos = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>();
     private final MutableLiveData<QueryMode> queryMode = new MutableLiveData<>();
 
-
     @Inject
-    public TodoListViewModel(GetTodosUseCase getTodosUseCase) {
+    public TodoListViewModel(GetTodosUseCase getTodosUseCase, PatchTodoUseCase patchTodoUseCase) {
         this.getTodosUseCase = getTodosUseCase;
+        this.patchTodoUseCase = patchTodoUseCase;
     }
 
     public LiveData<TodoResponse> getTodos() {
@@ -68,6 +71,24 @@ public class TodoListViewModel extends ViewModel {
                 errorMessage.postValue(message);
             }
 
+        });
+    }
+
+    public void updateTodoStatus(Long todoId, boolean isCompleted) {
+        TodoUpdateRequest request = TodoUpdateRequest.builder()
+                .completed(isCompleted)
+                .build();
+        patchTodoUseCase.execute(todoId, request, new TodoRepository.TodoCallback<>() {
+            @Override
+            public void onSuccess(TodoResponse response) {
+                fetchTodos();
+            }
+
+            @Override
+            public void onError(String message) {
+                errorMessage.postValue("Failed to update task: " + message);
+                fetchTodos();
+            }
         });
     }
 
