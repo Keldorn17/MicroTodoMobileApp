@@ -1,7 +1,7 @@
 package hu.nje.todo.todo.domain.model;
 
 import java.time.ZonedDateTime;
-import java.util.List;
+import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,19 +12,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Todo {
+public class TodoUpdateRequest {
 
-    private Long id;
     private String title;
     private String description;
     private ZonedDateTime deadline;
     private Boolean completed;
-    private Long parentId;
-    private Boolean shared;
+    private Long parent;
     private Integer priority;
-    private List<String> categories;
-    private Integer accessLevel;
-    private ZonedDateTime createdAt;
-    private ZonedDateTime updatedAt;
+    private Set<String> categories;
 
 }
