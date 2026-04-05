@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import hu.nje.todo.databinding.FragmentTodoListBinding;
+import hu.nje.todo.todo.domain.model.Todo;
 import hu.nje.todo.todo.presentation.util.TodoAdapter;
 import hu.nje.todo.todo.presentation.viewmodel.TodoListViewModel;
 
@@ -31,9 +32,18 @@ public class TodoListFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
         binding = FragmentTodoListBinding.inflate(inflater, container, false);
-        adapter = new TodoAdapter();
+        adapter = new TodoAdapter(new TodoAdapter.TodoClickListener() {
+            @Override
+            public void onCardClicked(Todo item) {
+            }
+
+            @Override
+            public void onCheckboxToggled(Todo item, boolean isChecked) {
+                viewModel.updateTodoStatus(item.getId(), isChecked);
+            }
+        });
         return binding.getRoot();
     }
 
@@ -51,6 +61,7 @@ public class TodoListFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        binding = null;
         viewModel = null;
     }
 

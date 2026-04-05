@@ -1,20 +1,41 @@
 package hu.nje.todo.todo.presentation.util;
 
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.color.MaterialColors;
+
+import hu.nje.todo.R;
 import hu.nje.todo.databinding.ItemTodoBinding;
 import hu.nje.todo.todo.domain.model.Todo;
 
 public class TodoAdapter extends ListAdapter<Todo, TodoAdapter.TodoViewHolder> {
 
-    public TodoAdapter() {
+    private final TodoClickListener listener;
+
+    public interface TodoClickListener {
+
+        void onCardClicked(Todo item);
+
+        void onCheckboxToggled(Todo item, boolean isChecked);
+
+    }
+
+    public TodoAdapter(TodoClickListener listener) {
         super(new TodoDiffCallback());
+        this.listener = listener;
     }
 
     @NonNull
@@ -28,7 +49,7 @@ public class TodoAdapter extends ListAdapter<Todo, TodoAdapter.TodoViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull TodoViewHolder holder, int position) {
         Todo currentTodo = getItem(position);
-        holder.bind(currentTodo);
+        holder.bind(currentTodo, listener);
     }
 
     static class TodoViewHolder extends RecyclerView.ViewHolder {
@@ -40,10 +61,67 @@ public class TodoAdapter extends ListAdapter<Todo, TodoAdapter.TodoViewHolder> {
             this.binding = binding;
         }
 
-        public void bind(Todo todo) {
-            binding.textTodoTitle.setText(todo.getTitle());
-            binding.checkboxCompleted.setChecked(todo.getCompleted());
+        public void bind(Todo item, TodoClickListener listener) {
+            binding.tvTitle.setText(item.getTitle());
+            binding.tvDescription.setText(item.getDescription());
+            String formattedDate = item.getFormattedDate();
+            String formattedTime = item.getFormattedTime();
+            binding.tvDate.setText(
+                    formattedDate != null && !formattedDate.isEmpty() ? formattedDate : "No Date");
+            binding.tvTime.setText(
+                    formattedTime != null && !formattedTime.isEmpty() ? formattedTime : "--:--");
+            LayerDrawable bg = (LayerDrawable) binding.mainContainer.getBackground().mutate();
+            GradientDrawable priorityLayer =
+                    (GradientDrawable) bg.findDrawableByLayerId(R.id.card_priority_layer);
+            if (priorityLayer != null) {
+                int resolvedColor =
+                        ContextCompat.getColor(itemView.getContext(), item.getPriorityColorResId());
+                priorityLayer.setColor(resolvedColor);
+            }
+            binding.cbComplete.setOnCheckedChangeListener(null);
+            binding.cbComplete.setChecked(item.getCompleted());
+            binding.cbComplete.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (listener != null) {
+                    listener.onCheckboxToggled(item, isChecked);
+                }
+            });
+            binding.mainContainer.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onCardClicked(item);
+                }
+            });
+            binding.llCategories.removeAllViews();
+            if (item.getCategories() != null && !item.getCategories().isEmpty()) {
+                binding.llCategories.setVisibility(View.VISIBLE);
+                for (String category : item.getCategories()) {
+                    TextView pill = new TextView(itemView.getContext());
+                    pill.setText(category);
+                    int textColor = MaterialColors.getColor(itemView,
+                            com.google.android.material.R.attr.colorOnSurfaceVariant);
+                    pill.setTextColor(textColor);
+                    pill.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+                    pill.setBackgroundResource(R.drawable.bg_category_pill);
+                    int paddingHorizontal =
+                            (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12,
+                                    itemView.getResources().getDisplayMetrics());
+                    int paddingVertical =
+                            (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6,
+                                    itemView.getResources().getDisplayMetrics());
+                    pill.setPadding(paddingHorizontal, paddingVertical, paddingHorizontal,
+                            paddingVertical);
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    params.setMargins(0, 0, paddingHorizontal, 0);
+                    pill.setLayoutParams(params);
+                    binding.llCategories.addView(pill);
+                }
+            } else {
+                binding.llCategories.setVisibility(View.GONE);
+            }
         }
+
     }
 
     static class TodoDiffCallback extends DiffUtil.ItemCallback<Todo> {
@@ -57,6 +135,7 @@ public class TodoAdapter extends ListAdapter<Todo, TodoAdapter.TodoViewHolder> {
         public boolean areContentsTheSame(@NonNull Todo oldItem, @NonNull Todo newItem) {
             return oldItem.equals(newItem);
         }
+
     }
 
 }
