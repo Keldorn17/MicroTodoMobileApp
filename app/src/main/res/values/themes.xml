@@ -1,7 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Base.Theme.TodoApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
         <item name="colorPrimary">@color/daisy_light_primary</item>
         <item name="colorOnPrimary">@color/daisy_light_primary_content</item>
         <item name="colorSecondary">@color/daisy_light_secondary</item>
@@ -21,6 +19,9 @@
         <item name="colorSurfaceVariant">@color/daisy_light_base_200</item>
         <item name="colorOnSurfaceVariant">@color/daisy_light_base_content</item>
         <item name="colorSurfaceContainer">@color/daisy_light_base_100</item>
+
+        <item name="colorError">@color/daisy_light_error</item>
+        <item name="colorOnError">@color/daisy_light_error_content</item>
     </style>
 
     <style name="Theme.TodoApp" parent="Base.Theme.TodoApp" />

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Light Theme Colors (Daisy UI Default) -->
     <color name="daisy_light_primary">#422ad5</color>
     <color name="daisy_light_primary_content">#e0e7ff</color>
     <color name="daisy_light_secondary">#f43098</color>
@@ -13,8 +12,9 @@
     <color name="daisy_light_base_200">#f8f8f8</color>
     <color name="daisy_light_base_300">#eeeeee</color>
     <color name="daisy_light_base_content">#18181b</color>
+    <color name="daisy_light_error">#ef4444</color>
+    <color name="daisy_light_error_content">#ffffff</color>
 
-    <!-- Dark Theme Colors (Dracula) -->
     <color name="daisy_dark_primary">#ff79c6</color>
     <color name="daisy_dark_primary_content">#16050e</color>
     <color name="daisy_dark_secondary">#bd93f9</color>
@@ -29,7 +29,7 @@
     <color name="daisy_dark_base_content">#f8f8f3</color>
     <color name="daisy_dark_error">#ff5555</color>
     <color name="daisy_dark_error_content">#160202</color>
-    
+
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

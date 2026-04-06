@@ -1,7 +1,23 @@
 <resources>
     <string name="app_name">TodoApp</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="statistics_own_shared">Own / Shared</string>
+    <string name="statistics_status_own">Status of\nOwn Todos</string>
+    <string name="statistics_status_shared">Status of\nShared Todos</string>
+    <string name="error_api_general">API Error. (Check login/token!)</string>
+    <string name="error_data_processing">Data processing error: %1$s</string>
+    <string name="error_network">Network error occurred: %1$s</string>
+    <string name="title_statistics">Statistics</string>
+    <string name="statistics_no_general_data">No statistics to display</string>
+    <string name="statistics_no_priority_data">Create todos to see priority levels</string>
+    <string name="statistics_no_todos">No todos available yet</string>
+    <string name="statistics_no_own_todos">No own todos to analyze</string>
+    <string name="statistics_no_shared_todos">No shared todos yet</string>
+    <string name="label_own">Own</string>
+    <string name="label_shared">Shared</string>
+    <string name="label_finished">Finished</string>
+    <string name="label_unfinished">Unfinished</string>
+    <string name="label_total">Total</string>
 
     <string name="title_my_todos">My Todos</string>
     <string name="title_shared_todos">Shared Todos</string>
