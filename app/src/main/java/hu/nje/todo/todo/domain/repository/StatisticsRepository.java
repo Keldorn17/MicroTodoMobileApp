@@ -1,11 +1,11 @@
 package hu.nje.todo.todo.domain.repository;
 
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.PieData;
+import hu.nje.todo.todo.domain.model.StatisticsChartData;
+
 public interface StatisticsRepository {
 
     interface StatisticsCallback {
-        void onDataLoaded(PieData ownShared, PieData ownStatus, PieData sharedStatus, BarData grouped, BarData stacked);
+        void onDataLoaded(StatisticsChartData chartData);
         void onError(String message);
     }
 

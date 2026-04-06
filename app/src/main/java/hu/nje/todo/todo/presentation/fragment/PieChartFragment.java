@@ -9,10 +9,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import dagger.hilt.android.AndroidEntryPoint;
+import hu.nje.todo.R;
 import hu.nje.todo.databinding.FragmentStatisticsPieBinding;
 import hu.nje.todo.todo.presentation.util.ChartStyleHelper;
 import hu.nje.todo.todo.presentation.viewmodel.StatisticsViewModel;
-
 
 @AndroidEntryPoint
 public class PieChartFragment extends Fragment {
@@ -25,9 +25,12 @@ public class PieChartFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentStatisticsPieBinding.inflate(inflater, container, false);
 
-        ChartStyleHelper.applyPieChartStyle(binding.pieChartOwnShared, "Own / Shared");
-        ChartStyleHelper.applyPieChartStyle(binding.pieChartOwnStatus, "Status of\nOwn Todos");
-        ChartStyleHelper.applyPieChartStyle(binding.pieChartSharedStatus, "Status of\nShared Todos");
+        ChartStyleHelper.applyPieChartStyle(requireContext(), binding.pieChartOwnShared,
+                getString(R.string.statistics_own_shared));
+        ChartStyleHelper.applyPieChartStyle(requireContext(), binding.pieChartOwnStatus,
+                getString(R.string.statistics_status_own));
+        ChartStyleHelper.applyPieChartStyle(requireContext(), binding.pieChartSharedStatus,
+                getString(R.string.statistics_status_shared));
 
         return binding.getRoot();
     }
@@ -37,18 +40,19 @@ public class PieChartFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(requireParentFragment()).get(StatisticsViewModel.class);
 
-        viewModel.getOwnSharedPieData().observe(getViewLifecycleOwner(), data -> {
+        viewModel.getOwnSharedData().observe(getViewLifecycleOwner(), data -> {
             updatePieVisibility(binding.pieChartOwnShared, binding.tvNoOwnSharedData, data);
         });
 
-        viewModel.getOwnStatusPieData().observe(getViewLifecycleOwner(), data -> {
+        viewModel.getOwnStatusData().observe(getViewLifecycleOwner(), data -> {
             updatePieVisibility(binding.pieChartOwnStatus, binding.tvNoOwnStatusData, data);
         });
 
-        viewModel.getSharedStatusPieData().observe(getViewLifecycleOwner(), data -> {
+        viewModel.getSharedStatusData().observe(getViewLifecycleOwner(), data -> {
             updatePieVisibility(binding.pieChartSharedStatus, binding.tvNoSharedData, data);
         });
     }
+
     private void updatePieVisibility(com.github.mikephil.charting.charts.PieChart chart, View emptyView, com.github.mikephil.charting.data.PieData data) {
         if (data == null || data.getEntryCount() == 0) {
             chart.setVisibility(View.INVISIBLE);

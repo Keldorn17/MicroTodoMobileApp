@@ -13,10 +13,12 @@ import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
 import hu.nje.todo.core.data.AuthInterceptor;
+import hu.nje.todo.todo.data.repository.StatisticsRepositoryImpl;
 import hu.nje.todo.todo.data.repository.TodoRepositoryImpl;
 import hu.nje.todo.todo.data.source.TodoApi;
 import hu.nje.todo.todo.domain.json.ZonedDateTimeDeserializer;
 import hu.nje.todo.todo.domain.json.ZonedDateTimeSerializer;
+import hu.nje.todo.todo.domain.repository.StatisticsRepository;
 import hu.nje.todo.todo.domain.repository.TodoRepository;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -58,6 +60,12 @@ public class TodoModule {
     @Singleton
     public TodoRepository provideTodoRepository(TodoApi todoApi) {
         return new TodoRepositoryImpl(todoApi);
+    }
+
+    @Provides
+    @Singleton
+    public StatisticsRepository provideStatisticsRepository(TodoApi todoApi, @dagger.hilt.android.qualifiers.ApplicationContext android.content.Context context) {
+        return new StatisticsRepositoryImpl(todoApi, context);
     }
 
 }

@@ -24,8 +24,8 @@ public class BarChartFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentStatisticsBarBinding.inflate(inflater, container, false);
 
-        ChartStyleHelper.applyGroupedBarChartStyle(binding.barChartGeneral);
-        ChartStyleHelper.applyStackedBarChartStyle(binding.barChartPriorities);
+        ChartStyleHelper.applyGroupedBarChartStyle(requireContext(), binding.barChartGeneral);
+        ChartStyleHelper.applyStackedBarChartStyle(requireContext(), binding.barChartPriorities);
 
         return binding.getRoot();
     }
@@ -42,6 +42,7 @@ public class BarChartFragment extends Fragment {
             } else {
                 binding.barChartGeneral.setVisibility(View.VISIBLE);
                 binding.tvNoGeneralBarData.setVisibility(View.GONE);
+
                 binding.barChartGeneral.setData(data);
                 binding.barChartGeneral.groupBars(0f, 0.1f, 0.02f);
                 binding.barChartGeneral.invalidate();
@@ -55,6 +56,7 @@ public class BarChartFragment extends Fragment {
             } else {
                 binding.barChartPriorities.setVisibility(View.VISIBLE);
                 binding.tvNoPriorityData.setVisibility(View.GONE);
+
                 binding.barChartPriorities.setData(data);
                 binding.barChartPriorities.invalidate();
             }

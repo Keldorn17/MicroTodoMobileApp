@@ -16,7 +16,6 @@ import hu.nje.todo.databinding.FragmentTodoStatisticsBinding;
 import hu.nje.todo.todo.presentation.util.StatisticsPagerAdapter;
 import hu.nje.todo.todo.presentation.viewmodel.StatisticsViewModel;
 
-
 @AndroidEntryPoint
 public class TodoStatisticsFragment extends Fragment {
 
@@ -38,7 +37,7 @@ public class TodoStatisticsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         if (viewModel != null) {
-            viewModel.loadStatistics();
+            viewModel.fetchStatistics();
         }
     }
 

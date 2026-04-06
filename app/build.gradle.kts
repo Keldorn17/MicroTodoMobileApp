@@ -44,7 +44,7 @@ android {
 }
 
 dependencies {
-    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation(libs.mp.android.chart)
     implementation(libs.navigation.fragment.ktx)
     implementation(libs.navigation.ui.ktx)
     implementation(libs.fragment)
