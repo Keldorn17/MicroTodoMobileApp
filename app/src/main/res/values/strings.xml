@@ -18,4 +18,8 @@
     <string name="label_finished">Finished</string>
     <string name="label_unfinished">Unfinished</string>
     <string name="label_total">Total</string>
+
+    <string name="title_my_todos">My Todos</string>
+    <string name="title_shared_todos">Shared Todos</string>
+    <string name="title_all_todos">All Todos</string>
 </resources>
