@@ -6,11 +6,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.google.gson.Gson;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import hu.nje.todo.R;
@@ -26,6 +31,9 @@ public class TodoListFragment extends Fragment {
     private TodoListViewModel viewModel;
     private TodoAdapter adapter;
 
+    @Inject
+    Gson gson;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,8 +46,11 @@ public class TodoListFragment extends Fragment {
         adapter = new TodoAdapter(new TodoAdapter.TodoClickListener() {
             @Override
             public void onCardClicked(Todo item) {
-                // Note for Szabolcs:
-                // Add code here to open edit page of a selected todo item.
+                String todoJson = gson.toJson(item);
+                Bundle bundle = new Bundle();
+                bundle.putString("todoJson", todoJson);
+                Navigation.findNavController(binding.getRoot())
+                        .navigate(R.id.todoEditorFragment, bundle);
             }
 
             @Override

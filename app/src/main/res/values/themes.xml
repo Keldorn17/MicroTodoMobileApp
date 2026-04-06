@@ -6,7 +6,7 @@
         <item name="colorOnSecondary">@color/daisy_light_secondary_content</item>
         <item name="colorTertiary">@color/daisy_light_accent</item>
         <item name="colorOnTertiary">@color/daisy_light_accent_content</item>
-        <item name="android:colorBackground">@color/daisy_light_base_200</item>
+        <item name="android:colorBackground">@color/daisy_light_base_300</item>
         <item name="colorOnBackground">@color/daisy_light_base_content</item>
         <item name="colorSurface">@color/daisy_light_base_100</item>
         <item name="colorOnSurface">@color/daisy_light_base_content</item>
