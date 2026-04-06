@@ -6,8 +6,11 @@ import androidx.annotation.NonNull;
 
 import hu.nje.todo.todo.data.source.TodoApi;
 import hu.nje.todo.todo.domain.model.Todo;
+import hu.nje.todo.todo.domain.model.TodoCreateRequest;
 import hu.nje.todo.todo.domain.model.TodoRequest;
 import hu.nje.todo.todo.domain.model.TodoResponse;
+import hu.nje.todo.todo.domain.model.TodoShareRequest;
+import hu.nje.todo.todo.domain.model.TodoSharesResponse;
 import hu.nje.todo.todo.domain.model.TodoUpdateRequest;
 import hu.nje.todo.todo.domain.repository.TodoRepository;
 
@@ -50,6 +53,26 @@ public class TodoRepositoryImpl implements TodoRepository {
     }
 
     @Override
+    public void createTodo(TodoCreateRequest request, TodoCallback<Todo> callback) {
+        todoApi.createTodo(request).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NotNull Call<Todo> call, @NotNull Response<Todo> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    Log.e(TAG, "onResponse: Failed to create todo " + response.code());
+                    callback.onError("Failed to create Todo");
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call<Todo> call, @NonNull Throwable throwable) {
+                callback.onError("Network error: " + throwable.getMessage());
+            }
+        });
+    }
+
+    @Override
     public void patchTodo(Long todoId, TodoUpdateRequest request,
             TodoCallback<Todo> callback) {
         todoApi.patchTodos(todoId, request).enqueue(new Callback<>() {
@@ -74,4 +97,71 @@ public class TodoRepositoryImpl implements TodoRepository {
         });
     }
 
+    @Override
+    public void getTodoShares(Long todoId, int page, int size, TodoCallback<TodoSharesResponse> callback) {
+        todoApi.getTodoShares(todoId, page, size).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<TodoSharesResponse> call, @NonNull Response<TodoSharesResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    Log.e(TAG, "onResponse: Failed to get todo shares " + response.code());
+                    if (response.code() == 403 || response.code() == 404) {
+                        callback.onError("ACCESS_DENIED");
+                    } else {
+                        callback.onError("Failed to get todo shares");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<TodoSharesResponse> call, @NonNull Throwable throwable) {
+                callback.onError("Network error: " + throwable.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void shareTodo(Long todoId, TodoShareRequest request, TodoCallback<Void> callback) {
+        todoApi.shareTodo(todoId, request).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(null);
+                } else {
+                    Log.e(TAG, "onResponse: Failed to share todo " + response.code());
+                    callback.onError("Failed to share todo");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable throwable) {
+                callback.onError("Network error: " + throwable.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void deleteTodoShare(Long todoId, String email, TodoCallback<Void> callback) {
+        todoApi.deleteTodoShare(todoId, email).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess(null);
+                } else {
+                    Log.e(TAG, "onResponse: Failed to delete todo share " + response.code());
+                    if (response.code() == 403 || response.code() == 404) {
+                        callback.onError("ACCESS_DENIED");
+                    } else {
+                        callback.onError("Failed to delete todo share");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable throwable) {
+                callback.onError("Network error: " + throwable.getMessage());
+            }
+        });
+    }
 }

@@ -49,5 +49,37 @@
         android:id="@+id/todoEditorFragment"
         android:name="hu.nje.todo.todo.presentation.fragment.TodoEditorFragment"
         android:label="fragment_todo_editor"
-        tools:layout="@layout/fragment_todo_editor" />
+        tools:layout="@layout/fragment_todo_editor">
+        <argument
+            android:name="todoJson"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <action
+            android:id="@+id/action_todoEditorFragment_to_manageCategoriesFragment"
+            app:destination="@id/manageCategoriesFragment" />
+        <action
+            android:id="@+id/action_todoEditorFragment_to_manageSharesFragment"
+            app:destination="@id/manageSharesFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/manageSharesFragment"
+        android:name="hu.nje.todo.todo.presentation.fragment.ManageSharesFragment"
+        android:label="fragment_manage_shares"
+        tools:layout="@layout/fragment_manage_shares">
+        <argument
+            android:name="todoId"
+            app:argType="long" />
+    </fragment>
+    <fragment
+        android:id="@+id/manageCategoriesFragment"
+        android:name="hu.nje.todo.todo.presentation.fragment.ManageCategoriesFragment"
+        android:label="fragment_manage_categories"
+        tools:layout="@layout/fragment_manage_categories">
+        <argument
+            android:name="categories"
+            app:argType="string[]"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
 </navigation>

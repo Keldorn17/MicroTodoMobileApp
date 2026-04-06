@@ -1,5 +1,6 @@
 package hu.nje.todo.todo.domain.util;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -9,14 +10,16 @@ public class DateTimeFormatUtil {
         if (deadline == null) {
             return "";
         }
-        return deadline.format(DateTimeFormatter.ofPattern("yyyy.MM.dd."));
+        return deadline.withZoneSameInstant(ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("yyyy.MM.dd."));
     }
 
     public static String getFormattedTime(ZonedDateTime deadline) {
         if (deadline == null) {
             return "";
         }
-        return deadline.format(DateTimeFormatter.ofPattern("HH:mm"));
+        return deadline.withZoneSameInstant(ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("HH:mm"));
     }
 
 }
