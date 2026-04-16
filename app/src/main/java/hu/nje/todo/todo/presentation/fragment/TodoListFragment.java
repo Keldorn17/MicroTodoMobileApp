@@ -1,22 +1,19 @@
 package hu.nje.todo.todo.presentation.fragment;
 
-import android.os.Bundle;
+import com.google.gson.Gson;
 
+import javax.inject.Inject;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import com.google.gson.Gson;
-
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 import hu.nje.todo.R;
 import hu.nje.todo.databinding.FragmentTodoListBinding;
@@ -68,6 +65,7 @@ public class TodoListFragment extends Fragment {
         initializeProgressBar();
         initializeRecyclerView();
         initializeTitle();
+        initializeStatistics();
         loadArgs();
         viewModel.fetchTodos();
     }
@@ -99,8 +97,22 @@ public class TodoListFragment extends Fragment {
         viewModel.getQueryMode().observe(getViewLifecycleOwner(), mode -> {
             switch (mode) {
                 case OWN -> binding.fragmentTitle.setText(getString(R.string.title_my_todos));
-                case SHARED -> binding.fragmentTitle.setText(getString(R.string.title_shared_todos));
+                case SHARED ->
+                        binding.fragmentTitle.setText(getString(R.string.title_shared_todos));
                 case ALL -> binding.fragmentTitle.setText(getString(R.string.title_all_todos));
+            }
+        });
+    }
+
+    private void initializeStatistics() {
+        viewModel.getStatistics().observe(getViewLifecycleOwner(), stats -> {
+            if (stats != null) {
+                binding.totalTextView.setText(
+                        getString(R.string.label_total_count, stats.getTotal()));
+                binding.finishedTextView.setText(
+                        getString(R.string.label_finished_count, stats.getFinished()));
+                binding.unfinishedTextView.setText(
+                        getString(R.string.label_unfinished_count, stats.getUnfinished()));
             }
         });
     }

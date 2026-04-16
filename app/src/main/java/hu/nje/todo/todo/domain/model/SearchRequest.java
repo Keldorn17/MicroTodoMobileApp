@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TodoRequest {
+public class SearchRequest {
 
     @Builder.Default
     private String search = "";
