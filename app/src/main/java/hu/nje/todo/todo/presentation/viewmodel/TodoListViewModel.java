@@ -1,21 +1,21 @@
 package hu.nje.todo.todo.presentation.viewmodel;
 
 import java.util.List;
-import java.util.Objects;
+
+import javax.inject.Inject;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-
-import javax.inject.Inject;
-
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import hu.nje.todo.todo.domain.model.QueryMode;
 import hu.nje.todo.todo.domain.model.Todo;
-import hu.nje.todo.todo.domain.model.TodoRequest;
 import hu.nje.todo.todo.domain.model.TodoResponse;
 import hu.nje.todo.todo.domain.model.TodoUpdateRequest;
+import hu.nje.todo.todo.domain.model.SearchRequest;
+import hu.nje.todo.todo.domain.model.TodoStatisticsResponse;
 import hu.nje.todo.todo.domain.repository.TodoRepository;
+import hu.nje.todo.todo.domain.usecase.GetTodoStatisticsUseCase;
 import hu.nje.todo.todo.domain.usecase.GetTodosUseCase;
 import hu.nje.todo.todo.domain.usecase.PatchTodoUseCase;
 
@@ -24,20 +24,28 @@ public class TodoListViewModel extends ViewModel {
 
     private final GetTodosUseCase getTodosUseCase;
     private final PatchTodoUseCase patchTodoUseCase;
+    private final GetTodoStatisticsUseCase getTodoStatisticsUseCase;
 
     private final MutableLiveData<TodoResponse> todos = new MutableLiveData<>();
+    private final MutableLiveData<TodoStatisticsResponse> statistics = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>();
     private final MutableLiveData<QueryMode> queryMode = new MutableLiveData<>();
 
     @Inject
-    public TodoListViewModel(GetTodosUseCase getTodosUseCase, PatchTodoUseCase patchTodoUseCase) {
+    public TodoListViewModel(GetTodosUseCase getTodosUseCase, PatchTodoUseCase patchTodoUseCase,
+            GetTodoStatisticsUseCase getTodoStatisticsUseCase) {
         this.getTodosUseCase = getTodosUseCase;
         this.patchTodoUseCase = patchTodoUseCase;
+        this.getTodoStatisticsUseCase = getTodoStatisticsUseCase;
     }
 
     public LiveData<TodoResponse> getTodos() {
         return todos;
+    }
+
+    public LiveData<TodoStatisticsResponse> getStatistics() {
+        return statistics;
     }
 
     public LiveData<String> getErrorMessage() {
@@ -58,7 +66,7 @@ public class TodoListViewModel extends ViewModel {
 
     public void fetchTodos() {
         loading.postValue(true);
-        TodoRequest request = TodoRequest.builder()
+        SearchRequest request = SearchRequest.builder()
                 .queryMode(queryMode.getValue())
                 .build();
         getTodosUseCase.execute(request, new TodoRepository.TodoCallback<>() {
@@ -67,6 +75,7 @@ public class TodoListViewModel extends ViewModel {
             public void onSuccess(TodoResponse response) {
                 loading.postValue(false);
                 todos.postValue(response);
+                fetchStatistics();
             }
 
             @Override
@@ -76,6 +85,24 @@ public class TodoListViewModel extends ViewModel {
             }
 
         });
+    }
+
+    public void fetchStatistics() {
+        SearchRequest request = SearchRequest.builder()
+                .queryMode(queryMode.getValue())
+                .build();
+        getTodoStatisticsUseCase.execute(request, null,
+                new TodoRepository.TodoCallback<>() {
+                    @Override
+                    public void onSuccess(TodoStatisticsResponse response) {
+                        statistics.postValue(response);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        errorMessage.postValue("Failed to fetch statistics: " + message);
+                    }
+                });
     }
 
     public void updateTodoStatus(Long todoId, boolean isCompleted) {
@@ -99,6 +126,7 @@ public class TodoListViewModel extends ViewModel {
                             .page(currentResponse.getPage())
                             .build();
                     todos.postValue(updatedResponse);
+                    fetchStatistics();
                 }
 
             }

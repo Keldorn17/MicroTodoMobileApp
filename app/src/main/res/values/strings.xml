@@ -18,7 +18,11 @@
     <string name="label_finished">Finished</string>
     <string name="label_unfinished">Unfinished</string>
     <string name="label_total">Total</string>
+    <string name="label_total_count">Total: %1$d</string>
+    <string name="label_finished_count">Finished: %1$d</string>
+    <string name="label_unfinished_count">Unfinished: %1$d</string>
 
+    <string name="title_todos">Todos</string>
     <string name="title_my_todos">My Todos</string>
     <string name="title_shared_todos">Shared Todos</string>
     <string name="title_all_todos">All Todos</string>
