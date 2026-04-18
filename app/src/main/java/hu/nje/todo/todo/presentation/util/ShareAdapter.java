@@ -17,6 +17,8 @@ import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
 import android.widget.Spinner;
 import hu.nje.todo.todo.domain.model.AccessLevel;
+import com.google.android.material.color.MaterialColors;
+import hu.nje.todo.R;
 
 public class ShareAdapter extends RecyclerView.Adapter<ShareAdapter.ShareViewHolder> {
 
@@ -68,7 +70,38 @@ public class ShareAdapter extends RecyclerView.Adapter<ShareAdapter.ShareViewHol
         }
 
         public void bind(TodoShareResponse share) {
-            binding.tvEmail.setText(share.getEmail());
+            String email = share.getEmail();
+            binding.tvEmail.setText(email);
+            
+            if (email != null && !email.isEmpty()) {
+                binding.tvAvatar.setText(email.substring(0, 1).toUpperCase());
+            } else {
+                binding.tvAvatar.setText("?");
+            }
+
+            int accessLevelValue = share.getAccessLevel() != null ? share.getAccessLevel() : 0;
+            int colorAttr = com.google.android.material.R.attr.colorSurfaceVariant;
+            int textColorAttr = com.google.android.material.R.attr.colorOnSurfaceVariant;
+
+            if (accessLevelValue == 3) {
+                colorAttr = androidx.appcompat.R.attr.colorPrimary;
+                textColorAttr = com.google.android.material.R.attr.colorOnPrimary;
+            } else if (accessLevelValue == 2) {
+                colorAttr = com.google.android.material.R.attr.colorSecondary;
+                textColorAttr = com.google.android.material.R.attr.colorOnSecondary;
+            } else if (accessLevelValue == 1) {
+                colorAttr = com.google.android.material.R.attr.colorTertiary;
+                textColorAttr = com.google.android.material.R.attr.colorOnTertiary;
+            }
+
+            int bgColor = MaterialColors.getColor(binding.getRoot(), colorAttr);
+            int textColor = MaterialColors.getColor(binding.getRoot(), textColorAttr);
+
+            binding.tvAvatar.getBackground().mutate().setTint(bgColor);
+            binding.tvAvatar.setTextColor(textColor);
+            
+            // Clear previous listener to avoid firing it during recycled view setup
+            binding.spinnerItemAccessLevel.setOnItemSelectedListener(null);
             
             // Setup Spinner for this item
             List<String> levels = new ArrayList<>();
@@ -93,23 +126,6 @@ public class ShareAdapter extends RecyclerView.Adapter<ShareAdapter.ShareViewHol
             
             binding.spinnerItemAccessLevel.setSelection(selectionIndex, false);
 
-            binding.spinnerItemAccessLevel.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                private boolean isFirstSelection = true;
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    if (isFirstSelection) {
-                        isFirstSelection = false;
-                        return;
-                    }
-                    AccessLevel newLevel = AccessLevel.values()[position];
-                    if (newLevel.getValue() != share.getAccessLevel() && actionListener != null) {
-                        actionListener.onUpdateAccessLevel(share, newLevel.getValue());
-                    }
-                }
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {}
-            });
-
             if (share.getAccessLevel() != null && share.getAccessLevel() == 3) {
                 binding.tvOwnerLabel.setVisibility(View.VISIBLE);
                 binding.spinnerItemAccessLevel.setVisibility(View.GONE);
@@ -118,6 +134,21 @@ public class ShareAdapter extends RecyclerView.Adapter<ShareAdapter.ShareViewHol
                 binding.tvOwnerLabel.setVisibility(View.GONE);
                 binding.spinnerItemAccessLevel.setVisibility(View.VISIBLE);
                 binding.btnDeleteShare.setVisibility(android.view.View.VISIBLE);
+                
+                binding.spinnerItemAccessLevel.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        String levelName = (String) parent.getItemAtPosition(position);
+                        AccessLevel newLevel = AccessLevel.valueOf(levelName);
+                        int currentAccLevel = share.getAccessLevel() != null ? share.getAccessLevel() : 0;
+                        if (newLevel.getValue() != currentAccLevel && actionListener != null) {
+                            actionListener.onUpdateAccessLevel(share, newLevel.getValue());
+                        }
+                    }
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {}
+                });
+
                 binding.btnDeleteShare.setOnClickListener(v -> {
                     if (actionListener != null) {
                         actionListener.onDeleteShare(share);

@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -46,6 +47,11 @@ public class TodoEditorViewModel extends ViewModel {
     private Long todoId = null;
     private boolean canEdit = true;
     private boolean isLoaded = false;
+    private ZonedDateTime originalDeadline = null;
+
+    public void setOriginalDeadline(ZonedDateTime dt) {
+        this.originalDeadline = dt;
+    }
 
     @Inject
     public TodoEditorViewModel(CreateTodoUseCase createTodoUseCase, 
@@ -213,9 +219,21 @@ public class TodoEditorViewModel extends ViewModel {
         });
     }
 
-    public void saveTodo(String title, String description, Integer priority) {
+    public void saveTodo(String title, String description, Integer priority, boolean isCompleted) {
         loading.postValue(true);
         ZonedDateTime currentDeadline = deadline.getValue();
+        
+        if (currentDeadline != null) {
+            boolean isModified = originalDeadline == null || !currentDeadline.isEqual(originalDeadline);
+            if (isModified) {
+                ZonedDateTime now = ZonedDateTime.now(ZoneId.systemDefault());
+                if (currentDeadline.isBefore(now)) {
+                    currentDeadline = now.plusMinutes(1);
+                    deadline.postValue(currentDeadline);
+                }
+            }
+        }
+
         java.util.Set<String> currentCategories = categories.getValue() != null ? categories.getValue() : new java.util.HashSet<>();
 
         if (todoId == null) {
@@ -224,7 +242,7 @@ public class TodoEditorViewModel extends ViewModel {
                     .description(description)
                     .priority(priority)
                     .deadline(currentDeadline)
-                    .completed(false)
+                    .completed(isCompleted)
                     .categories(currentCategories)
                     .build();
 
@@ -242,11 +260,21 @@ public class TodoEditorViewModel extends ViewModel {
                 }
             });
         } else {
+            ZonedDateTime deadlineToSend = currentDeadline;
+            if (currentDeadline != null && originalDeadline != null) {
+                if (currentDeadline.isEqual(originalDeadline)) {
+                    deadlineToSend = null;
+                }
+            } else if (currentDeadline == null && originalDeadline == null) {
+                deadlineToSend = null;
+            }
+
             TodoUpdateRequest request = TodoUpdateRequest.builder()
                     .title(title)
                     .description(description)
                     .priority(priority)
-                    .deadline(currentDeadline)
+                    .deadline(deadlineToSend)
+                    .completed(isCompleted)
                     .categories(currentCategories)
                     .build();
 

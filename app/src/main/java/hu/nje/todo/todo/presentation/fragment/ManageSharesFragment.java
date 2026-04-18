@@ -87,14 +87,14 @@ public class ManageSharesFragment extends Fragment {
             @Override
             public void onDeleteShare(TodoShareResponse share) {
                 if (todoId != null) {
-                    viewModel.deleteShare(todoId, share.getEmail());
+                    viewModel.deleteShareLocal(share.getEmail());
                 }
             }
 
             @Override
             public void onUpdateAccessLevel(TodoShareResponse share, int newLevel) {
                 if (todoId != null) {
-                    viewModel.shareTodo(todoId, share.getEmail(), newLevel);
+                    viewModel.shareTodoLocal(share.getEmail(), newLevel);
                 }
             }
         });
@@ -104,7 +104,13 @@ public class ManageSharesFragment extends Fragment {
 
     private void setupClickListeners() {
         binding.btnBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
-        binding.btnDone.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
+        binding.btnDone.setOnClickListener(v -> {
+            if (todoId != null) {
+                viewModel.saveChanges(todoId);
+            } else {
+                Navigation.findNavController(v).popBackStack();
+            }
+        });
 
         binding.btnShare.setOnClickListener(v -> {
             String email = binding.etShareEmail.getText() != null ? 
@@ -119,7 +125,7 @@ public class ManageSharesFragment extends Fragment {
             AccessLevel selectedLevel = AccessLevel.values()[selectedPosition];
 
             if (todoId != null) {
-                viewModel.shareTodo(todoId, email, selectedLevel.getValue());
+                viewModel.shareTodoLocal(email, selectedLevel.getValue());
                 binding.etShareEmail.setText("");
             }
         });
@@ -133,6 +139,7 @@ public class ManageSharesFragment extends Fragment {
         viewModel.isLoading().observe(getViewLifecycleOwner(), isLoading -> {
             binding.sharesProgressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
             binding.btnShare.setEnabled(!isLoading);
+            binding.btnDone.setEnabled(!isLoading);
         });
 
         viewModel.getErrorMessage().observe(getViewLifecycleOwner(), message -> {
@@ -144,6 +151,13 @@ public class ManageSharesFragment extends Fragment {
         viewModel.isAccessDenied().observe(getViewLifecycleOwner(), denied -> {
             if (denied != null && denied) {
                 Toast.makeText(requireContext(), "Access denied", Toast.LENGTH_SHORT).show();
+                Navigation.findNavController(requireView()).popBackStack();
+            }
+        });
+
+        viewModel.isSaveSuccess().observe(getViewLifecycleOwner(), success -> {
+            if (success != null && success) {
+                Toast.makeText(requireContext(), "Shares updated successfully", Toast.LENGTH_SHORT).show();
                 Navigation.findNavController(requireView()).popBackStack();
             }
         });

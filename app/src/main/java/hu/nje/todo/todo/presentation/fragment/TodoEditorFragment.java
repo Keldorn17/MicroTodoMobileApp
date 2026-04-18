@@ -77,8 +77,14 @@ public class TodoEditorFragment extends Fragment {
         loadTodoIfEditing();
         
         // Restore UI state if already loaded (e.g. after theme change)
-        if (viewModel.isLoaded() && !viewModel.canEdit()) {
-            disableEditing();
+        if (viewModel.isLoaded()) {
+            if (viewModel.getTodoId() != null) {
+                binding.tvHeadline.setText("Edit Todo");
+                binding.btnSave.setText("Save Todo");
+            }
+            if (!viewModel.canEdit()) {
+                disableEditing();
+            }
         }
     }
 
@@ -91,15 +97,22 @@ public class TodoEditorFragment extends Fragment {
                 Todo todo = gson.fromJson(todoJson, Todo.class);
                 if (todo != null) {
                     viewModel.setTodoId(todo.getId());
+                    binding.tvHeadline.setText("Edit Todo");
+                    binding.btnSave.setText("Save Todo");
                     binding.etTitle.setText(todo.getTitle());
                     binding.etDescription.setText(todo.getDescription());
                     
+                    if (todo.getCompleted() != null) {
+                        binding.cbCompleted.setChecked(todo.getCompleted());
+                    }
+
                     Priority priority = Priority.fromValue(todo.getPriority());
                     binding.spinnerPriority.setSelection(priority.ordinal());
 
                     if (todo.getDeadline() != null) {
                         ZonedDateTime localDeadline = todo.getDeadline().withZoneSameInstant(ZoneId.systemDefault());
                         viewModel.setDeadline(localDeadline);
+                        viewModel.setOriginalDeadline(localDeadline);
                     }
                     if (todo.getCategories() != null) {
                         viewModel.setCategories(new java.util.HashSet<>(todo.getCategories()));
@@ -118,6 +131,7 @@ public class TodoEditorFragment extends Fragment {
     }
 
     private void disableEditing() {
+        binding.cbCompleted.setEnabled(false);
         binding.etTitle.setEnabled(false);
         binding.etDescription.setEnabled(false);
         binding.spinnerPriority.setEnabled(false);
@@ -168,7 +182,9 @@ public class TodoEditorFragment extends Fragment {
             int priorityIndex = binding.spinnerPriority.getSelectedItemPosition();
             Priority selectedPriority = Priority.values()[priorityIndex];
 
-            viewModel.saveTodo(title, description, selectedPriority.getValue());
+            boolean isCompleted = binding.cbCompleted.isChecked();
+
+            viewModel.saveTodo(title, description, selectedPriority.getValue(), isCompleted);
         });
 
         binding.cardManageCategories.setOnClickListener(v -> {
@@ -199,6 +215,22 @@ public class TodoEditorFragment extends Fragment {
             calendar.set(currentDt.getYear(), currentDt.getMonthValue() - 1, currentDt.getDayOfMonth());
         }
 
+        Calendar now = Calendar.getInstance();
+        now.set(Calendar.HOUR_OF_DAY, 0);
+        now.set(Calendar.MINUTE, 0);
+        now.set(Calendar.SECOND, 0);
+        now.set(Calendar.MILLISECOND, 0);
+        
+        Calendar checkCal = (Calendar) calendar.clone();
+        checkCal.set(Calendar.HOUR_OF_DAY, 0);
+        checkCal.set(Calendar.MINUTE, 0);
+        checkCal.set(Calendar.SECOND, 0);
+        checkCal.set(Calendar.MILLISECOND, 0);
+
+        if (checkCal.before(now)) {
+            calendar = Calendar.getInstance();
+        }
+
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 requireContext(),
                 (view, year, month, dayOfMonth) -> {
@@ -209,12 +241,19 @@ public class TodoEditorFragment extends Fragment {
                     } else {
                         newDt = selectedDate.atStartOfDay(ZoneId.systemDefault());
                     }
+                    
+                    ZonedDateTime nowDt = ZonedDateTime.now(ZoneId.systemDefault());
+                    if (newDt.isBefore(nowDt)) {
+                        newDt = nowDt;
+                    }
+                    
                     viewModel.setDeadline(newDt);
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH)
         );
+        datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
         datePickerDialog.show();
     }
 
@@ -236,6 +275,7 @@ public class TodoEditorFragment extends Fragment {
                     } else {
                         newDt = ZonedDateTime.now(ZoneId.systemDefault()).with(selectedTime);
                     }
+                    
                     viewModel.setDeadline(newDt);
                 },
                 calendar.get(Calendar.HOUR_OF_DAY),
@@ -307,15 +347,15 @@ public class TodoEditorFragment extends Fragment {
     private TextView createCategoryPill(String category) {
         TextView pill = new TextView(requireContext());
         pill.setText(category);
-        int pink = ContextCompat.getColor(requireContext(), R.color.daisy_dark_primary);
-        pill.setTextColor(pink);
+        int secondaryColor = MaterialColors.getColor(requireContext(), com.google.android.material.R.attr.colorSecondary, android.graphics.Color.GRAY);
+        pill.setTextColor(secondaryColor);
         pill.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         pill.setTypeface(null, android.graphics.Typeface.BOLD);
 
         android.graphics.drawable.GradientDrawable shape = new android.graphics.drawable.GradientDrawable();
         shape.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
         shape.setCornerRadius(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 100, getResources().getDisplayMetrics()));
-        shape.setStroke((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, getResources().getDisplayMetrics()), pink);
+        shape.setStroke((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, getResources().getDisplayMetrics()), secondaryColor);
         shape.setColor(android.graphics.Color.TRANSPARENT);
         pill.setBackground(shape);
 

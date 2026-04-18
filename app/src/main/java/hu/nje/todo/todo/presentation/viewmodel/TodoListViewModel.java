@@ -87,7 +87,7 @@ public class TodoListViewModel extends ViewModel {
             public void onSuccess(Todo response) {
                 TodoResponse currentResponse = todos.getValue();
                 if (currentResponse != null && currentResponse.getContent() != null) {
-                    List<Todo> currentList = currentResponse.getContent();
+                    List<Todo> currentList = new java.util.ArrayList<>(currentResponse.getContent());
                     for (int i = 0; i < currentList.size(); i++) {
                         if (currentList.get(i).getId().equals(todoId)) {
                             currentList.set(i, response);

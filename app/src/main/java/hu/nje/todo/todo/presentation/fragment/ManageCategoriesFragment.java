@@ -51,7 +51,6 @@ public class ManageCategoriesFragment extends Fragment {
         adapter = new CategoryAdapter(category -> {
             categories.remove(category);
             adapter.setCategories(new ArrayList<>(categories));
-            sendResult();
         });
         binding.rvCategories.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvCategories.setAdapter(adapter);
@@ -60,7 +59,10 @@ public class ManageCategoriesFragment extends Fragment {
 
     private void setupClickListeners() {
         binding.btnBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
-        binding.btnDone.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
+        binding.btnDone.setOnClickListener(v -> {
+            sendResult();
+            Navigation.findNavController(v).popBackStack();
+        });
 
         binding.btnAddCategory.setOnClickListener(v -> {
             String categoryName = binding.etCategoryName.getText() != null ? 
@@ -79,7 +81,6 @@ public class ManageCategoriesFragment extends Fragment {
             categories.add(categoryName);
             adapter.setCategories(new ArrayList<>(categories));
             binding.etCategoryName.setText("");
-            sendResult();
         });
     }
 
