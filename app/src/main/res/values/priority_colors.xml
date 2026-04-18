@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="priority_critical">@color/daisy_light_error</color>
+    <color name="priority_high">@color/daisy_light_primary</color>
+    <color name="priority_normal">@color/daisy_light_secondary</color>
+    <color name="priority_low">@color/daisy_light_accent</color>
+    <color name="priority_none">@color/daisy_light_neutral</color>
+</resources>
