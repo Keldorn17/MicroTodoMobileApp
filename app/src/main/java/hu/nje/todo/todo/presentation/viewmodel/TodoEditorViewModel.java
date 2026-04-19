@@ -6,7 +6,11 @@ import androidx.lifecycle.ViewModel;
 
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 
@@ -39,7 +43,7 @@ public class TodoEditorViewModel extends ViewModel {
 
     private final MutableLiveData<ZonedDateTime> deadline = new MutableLiveData<>();
     
-    private final MutableLiveData<List<TodoShareResponse>> shares = new MutableLiveData<>();
+    private final MutableLiveData<List<TodoShareResponse>> shares = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<Boolean> sharesLoading = new MutableLiveData<>();
     private final MutableLiveData<Boolean> accessDenied = new MutableLiveData<>();
     
@@ -48,6 +52,8 @@ public class TodoEditorViewModel extends ViewModel {
     private boolean canEdit = true;
     private boolean isLoaded = false;
     private ZonedDateTime originalDeadline = null;
+
+    private List<TodoShareResponse> originalShares = new ArrayList<>();
 
     public void setOriginalDeadline(ZonedDateTime dt) {
         this.originalDeadline = dt;
@@ -146,6 +152,10 @@ public class TodoEditorViewModel extends ViewModel {
         deadline.setValue(dt);
     }
 
+    public void setShares(List<TodoShareResponse> updatedShares) {
+        shares.setValue(new ArrayList<>(updatedShares));
+    }
+
     public void loadShares(Long id) {
         if (id == null) return;
         sharesLoading.postValue(true);
@@ -153,58 +163,10 @@ public class TodoEditorViewModel extends ViewModel {
             @Override
             public void onSuccess(TodoSharesResponse response) {
                 sharesLoading.postValue(false);
-                if (response != null) {
-                    shares.postValue(response.getContent());
+                if (response != null && response.getContent() != null) {
+                    originalShares = new ArrayList<>(response.getContent());
+                    shares.postValue(new ArrayList<>(originalShares));
                 }
-            }
-
-            @Override
-            public void onError(String message) {
-                sharesLoading.postValue(false);
-                if ("ACCESS_DENIED".equals(message)) {
-                    accessDenied.postValue(true);
-                } else {
-                    errorMessage.postValue(message);
-                }
-            }
-        });
-    }
-
-    public void shareTodo(String email) {
-        if (todoId == null) {
-            errorMessage.postValue("Cannot share an unsaved todo.");
-            return;
-        }
-        sharesLoading.postValue(true);
-        TodoShareRequest request = TodoShareRequest.builder()
-                .email(email)
-                .accessLevel(1)
-                .build();
-        shareTodoUseCase.execute(todoId, request, new TodoRepository.TodoCallback<>() {
-            @Override
-            public void onSuccess(Void response) {
-                loadShares(todoId);
-            }
-
-            @Override
-            public void onError(String message) {
-                sharesLoading.postValue(false);
-                if ("ACCESS_DENIED".equals(message)) {
-                    accessDenied.postValue(true);
-                } else {
-                    errorMessage.postValue(message);
-                }
-            }
-        });
-    }
-
-    public void deleteShare(String email) {
-        if (todoId == null) return;
-        sharesLoading.postValue(true);
-        deleteTodoShareUseCase.execute(todoId, email, new TodoRepository.TodoCallback<>() {
-            @Override
-            public void onSuccess(Void response) {
-                loadShares(todoId);
             }
 
             @Override
@@ -249,8 +211,7 @@ public class TodoEditorViewModel extends ViewModel {
             createTodoUseCase.execute(request, new TodoRepository.TodoCallback<>() {
                 @Override
                 public void onSuccess(Todo response) {
-                    loading.postValue(false);
-                    success.postValue(true);
+                    saveShares(response.getId());
                 }
 
                 @Override
@@ -281,8 +242,7 @@ public class TodoEditorViewModel extends ViewModel {
             patchTodoUseCase.execute(todoId, request, new TodoRepository.TodoCallback<>() {
                 @Override
                 public void onSuccess(Todo response) {
-                    loading.postValue(false);
-                    success.postValue(true);
+                    saveShares(todoId);
                 }
 
                 @Override
@@ -291,6 +251,101 @@ public class TodoEditorViewModel extends ViewModel {
                     errorMessage.postValue(message);
                 }
             });
+        }
+    }
+
+    private void saveShares(Long savedTodoId) {
+        List<TodoShareResponse> currentShares = shares.getValue();
+        if (currentShares == null) currentShares = new ArrayList<>();
+
+        Map<String, TodoShareResponse> originalMap = new HashMap<>();
+        for (TodoShareResponse s : originalShares) {
+            if (s.getEmail() != null) {
+                originalMap.put(s.getEmail().toLowerCase(), s);
+            }
+        }
+
+        Map<String, TodoShareResponse> currentMap = new HashMap<>();
+        for (TodoShareResponse s : currentShares) {
+            if (s.getEmail() != null) {
+                currentMap.put(s.getEmail().toLowerCase(), s);
+            }
+        }
+
+        List<String> toDelete = new ArrayList<>();
+        for (Map.Entry<String, TodoShareResponse> entry : originalMap.entrySet()) {
+            if (!currentMap.containsKey(entry.getKey())) {
+                toDelete.add(entry.getValue().getEmail());
+            }
+        }
+
+        List<TodoShareRequest> toShare = new ArrayList<>();
+        for (Map.Entry<String, TodoShareResponse> entry : currentMap.entrySet()) {
+            String lowerEmail = entry.getKey();
+            TodoShareResponse current = entry.getValue();
+            TodoShareResponse original = originalMap.get(lowerEmail);
+
+            Integer originalLevel = original != null ? original.getAccessLevel() : null;
+            Integer currentLevel = current.getAccessLevel();
+            
+            boolean isLevelDifferent = false;
+            if (originalLevel == null && currentLevel != null) {
+                isLevelDifferent = true;
+            } else if (originalLevel != null && !originalLevel.equals(currentLevel)) {
+                isLevelDifferent = true;
+            }
+
+            if (original == null || isLevelDifferent) {
+                toShare.add(TodoShareRequest.builder()
+                        .email(current.getEmail())
+                        .accessLevel(current.getAccessLevel())
+                        .build());
+            }
+        }
+
+        int totalOperations = toDelete.size() + toShare.size();
+        if (totalOperations == 0) {
+            loading.postValue(false);
+            success.postValue(true);
+            return;
+        }
+
+        AtomicInteger completedOps = new AtomicInteger(0);
+        AtomicInteger failedOps = new AtomicInteger(0);
+
+        TodoRepository.TodoCallback<Void> callback = new TodoRepository.TodoCallback<>() {
+            @Override
+            public void onSuccess(Void response) {
+                checkCompletion();
+            }
+
+            @Override
+            public void onError(String message) {
+                failedOps.incrementAndGet();
+                if ("ACCESS_DENIED".equals(message)) {
+                    accessDenied.postValue(true);
+                } else {
+                    errorMessage.postValue(message);
+                }
+                checkCompletion();
+            }
+
+            private void checkCompletion() {
+                if (completedOps.incrementAndGet() == totalOperations) {
+                    loading.postValue(false);
+                    if (failedOps.get() == 0) {
+                        success.postValue(true);
+                    }
+                }
+            }
+        };
+
+        for (String email : toDelete) {
+            deleteTodoShareUseCase.execute(savedTodoId, email, callback);
+        }
+
+        for (TodoShareRequest request : toShare) {
+            shareTodoUseCase.execute(savedTodoId, request, callback);
         }
     }
 }

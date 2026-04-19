@@ -13,6 +13,10 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.google.gson.Gson;
+
+import javax.inject.Inject;
+
 import dagger.hilt.android.AndroidEntryPoint;
 import hu.nje.todo.databinding.FragmentManageSharesBinding;
 import hu.nje.todo.todo.presentation.util.ShareAdapter;
@@ -30,7 +34,9 @@ public class ManageSharesFragment extends Fragment {
     private FragmentManageSharesBinding binding;
     private ManageSharesViewModel viewModel;
     private ShareAdapter shareAdapter;
-    private Long todoId;
+
+    @Inject
+    Gson gson;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -44,18 +50,21 @@ public class ManageSharesFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(ManageSharesViewModel.class);
 
-        if (getArguments() != null) {
-            todoId = getArguments().getLong("todoId");
+        if (getArguments() != null && getArguments().containsKey("sharesJson")) {
+            String sharesJson = getArguments().getString("sharesJson");
+            if (sharesJson != null) {
+                java.lang.reflect.Type type = new com.google.gson.reflect.TypeToken<List<TodoShareResponse>>(){}.getType();
+                List<TodoShareResponse> initialShares = gson.fromJson(sharesJson, type);
+                if (initialShares != null && viewModel.getShares().getValue() != null && viewModel.getShares().getValue().isEmpty()) {
+                    viewModel.setInitialShares(initialShares);
+                }
+            }
         }
 
         setupRecyclerView();
         setupAccessLevelSpinner();
         setupClickListeners();
         observeViewModel();
-
-        if (todoId != null) {
-            viewModel.loadShares(todoId);
-        }
     }
 
     private void setupAccessLevelSpinner() {
@@ -78,7 +87,6 @@ public class ManageSharesFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.spinnerAccessLevel.setAdapter(adapter);
         
-        // Default to WRITE
         binding.spinnerAccessLevel.setSelection(writeIndex);
     }
 
@@ -86,16 +94,12 @@ public class ManageSharesFragment extends Fragment {
         shareAdapter = new ShareAdapter(new ShareAdapter.OnShareActionListener() {
             @Override
             public void onDeleteShare(TodoShareResponse share) {
-                if (todoId != null) {
-                    viewModel.deleteShareLocal(share.getEmail());
-                }
+                viewModel.deleteShareLocal(share.getEmail());
             }
 
             @Override
             public void onUpdateAccessLevel(TodoShareResponse share, int newLevel) {
-                if (todoId != null) {
-                    viewModel.shareTodoLocal(share.getEmail(), newLevel);
-                }
+                viewModel.shareTodoLocal(share.getEmail(), newLevel);
             }
         });
         binding.rvShares.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -105,11 +109,13 @@ public class ManageSharesFragment extends Fragment {
     private void setupClickListeners() {
         binding.btnBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
         binding.btnDone.setOnClickListener(v -> {
-            if (todoId != null) {
-                viewModel.saveChanges(todoId);
-            } else {
-                Navigation.findNavController(v).popBackStack();
+            List<TodoShareResponse> currentShares = viewModel.getShares().getValue();
+            if (currentShares != null) {
+                Bundle result = new Bundle();
+                result.putString("sharesJson", gson.toJson(currentShares));
+                getParentFragmentManager().setFragmentResult("shares_request", result);
             }
+            Navigation.findNavController(v).popBackStack();
         });
 
         binding.btnShare.setOnClickListener(v -> {
@@ -124,10 +130,8 @@ public class ManageSharesFragment extends Fragment {
             int selectedPosition = binding.spinnerAccessLevel.getSelectedItemPosition();
             AccessLevel selectedLevel = AccessLevel.values()[selectedPosition];
 
-            if (todoId != null) {
-                viewModel.shareTodoLocal(email, selectedLevel.getValue());
-                binding.etShareEmail.setText("");
-            }
+            viewModel.shareTodoLocal(email, selectedLevel.getValue());
+            binding.etShareEmail.setText("");
         });
     }
 
@@ -136,31 +140,7 @@ public class ManageSharesFragment extends Fragment {
             shareAdapter.setShares(shares);
         });
 
-        viewModel.isLoading().observe(getViewLifecycleOwner(), isLoading -> {
-            binding.sharesProgressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-            binding.btnShare.setEnabled(!isLoading);
-            binding.btnDone.setEnabled(!isLoading);
-        });
-
-        viewModel.getErrorMessage().observe(getViewLifecycleOwner(), message -> {
-            if (message != null && !message.isEmpty()) {
-                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        viewModel.isAccessDenied().observe(getViewLifecycleOwner(), denied -> {
-            if (denied != null && denied) {
-                Toast.makeText(requireContext(), "Access denied", Toast.LENGTH_SHORT).show();
-                Navigation.findNavController(requireView()).popBackStack();
-            }
-        });
-
-        viewModel.isSaveSuccess().observe(getViewLifecycleOwner(), success -> {
-            if (success != null && success) {
-                Toast.makeText(requireContext(), "Shares updated successfully", Toast.LENGTH_SHORT).show();
-                Navigation.findNavController(requireView()).popBackStack();
-            }
-        });
+        binding.sharesProgressBar.setVisibility(View.GONE);
     }
 
     @Override

@@ -80,22 +80,22 @@ public class ShareAdapter extends RecyclerView.Adapter<ShareAdapter.ShareViewHol
             }
 
             int accessLevelValue = share.getAccessLevel() != null ? share.getAccessLevel() : 0;
-            int colorAttr = com.google.android.material.R.attr.colorSurfaceVariant;
-            int textColorAttr = com.google.android.material.R.attr.colorOnSurfaceVariant;
+            int bgColorRes = R.color.daisy_dark_secondary;
+            int textColorRes = R.color.daisy_dark_secondary_content;
 
             if (accessLevelValue == 3) {
-                colorAttr = androidx.appcompat.R.attr.colorPrimary;
-                textColorAttr = com.google.android.material.R.attr.colorOnPrimary;
+                bgColorRes = R.color.daisy_dark_primary;
+                textColorRes = R.color.daisy_dark_primary_content;
             } else if (accessLevelValue == 2) {
-                colorAttr = com.google.android.material.R.attr.colorSecondary;
-                textColorAttr = com.google.android.material.R.attr.colorOnSecondary;
+                bgColorRes = R.color.daisy_dark_neutral;
+                textColorRes = R.color.daisy_dark_neutral_content;
             } else if (accessLevelValue == 1) {
-                colorAttr = com.google.android.material.R.attr.colorTertiary;
-                textColorAttr = com.google.android.material.R.attr.colorOnTertiary;
+                bgColorRes = R.color.daisy_dark_accent;
+                textColorRes = R.color.daisy_dark_accent_content;
             }
 
-            int bgColor = MaterialColors.getColor(binding.getRoot(), colorAttr);
-            int textColor = MaterialColors.getColor(binding.getRoot(), textColorAttr);
+            int bgColor = androidx.core.content.ContextCompat.getColor(itemView.getContext(), bgColorRes);
+            int textColor = androidx.core.content.ContextCompat.getColor(itemView.getContext(), textColorRes);
 
             binding.tvAvatar.getBackground().mutate().setTint(bgColor);
             binding.tvAvatar.setTextColor(textColor);

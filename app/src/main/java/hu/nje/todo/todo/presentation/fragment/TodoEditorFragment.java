@@ -39,6 +39,7 @@ import hu.nje.todo.R;
 import hu.nje.todo.databinding.FragmentTodoEditorBinding;
 import hu.nje.todo.todo.domain.model.Priority;
 import hu.nje.todo.todo.domain.model.Todo;
+import hu.nje.todo.todo.domain.model.TodoShareResponse;
 import hu.nje.todo.todo.presentation.viewmodel.TodoEditorViewModel;
 
 import hu.nje.todo.todo.domain.model.AccessLevel;
@@ -68,6 +69,17 @@ public class TodoEditorFragment extends Fragment {
             ArrayList<String> updatedCategories = result.getStringArrayList("categories");
             if (updatedCategories != null) {
                 viewModel.setCategories(new java.util.HashSet<>(updatedCategories));
+            }
+        });
+
+        getParentFragmentManager().setFragmentResultListener("shares_request", getViewLifecycleOwner(), (requestKey, result) -> {
+            String sharesJson = result.getString("sharesJson");
+            if (sharesJson != null) {
+                java.lang.reflect.Type type = new com.google.gson.reflect.TypeToken<List<TodoShareResponse>>(){}.getType();
+                List<TodoShareResponse> updatedShares = gson.fromJson(sharesJson, type);
+                if (updatedShares != null) {
+                    viewModel.setShares(updatedShares);
+                }
             }
         });
 
@@ -198,12 +210,11 @@ public class TodoEditorFragment extends Fragment {
         });
 
         binding.cardManageShares.setOnClickListener(v -> {
-            if (viewModel.getTodoId() == null) {
-                Toast.makeText(requireContext(), "Please save the todo first before sharing.", Toast.LENGTH_SHORT).show();
-                return;
-            }
             Bundle args = new Bundle();
-            args.putLong("todoId", viewModel.getTodoId());
+            List<TodoShareResponse> currentShares = viewModel.getShares().getValue();
+            if (currentShares != null) {
+                args.putString("sharesJson", gson.toJson(currentShares));
+            }
             Navigation.findNavController(v).navigate(R.id.action_todoEditorFragment_to_manageSharesFragment, args);
         });
     }
