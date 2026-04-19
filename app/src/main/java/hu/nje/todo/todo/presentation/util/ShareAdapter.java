@@ -100,10 +100,8 @@ public class ShareAdapter extends RecyclerView.Adapter<ShareAdapter.ShareViewHol
             binding.tvAvatar.getBackground().mutate().setTint(bgColor);
             binding.tvAvatar.setTextColor(textColor);
             
-            // Clear previous listener to avoid firing it during recycled view setup
             binding.spinnerItemAccessLevel.setOnItemSelectedListener(null);
             
-            // Setup Spinner for this item
             List<String> levels = new ArrayList<>();
             int selectionIndex = 0;
             int i = 0;
