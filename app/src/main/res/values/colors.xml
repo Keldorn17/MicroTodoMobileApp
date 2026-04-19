@@ -32,7 +32,7 @@
 
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    
+
     <!-- Custom UI Card Colors -->
     <color name="slate_gray">#2C3E50</color>
     <color name="slate_gray_dark">#1A252F</color>

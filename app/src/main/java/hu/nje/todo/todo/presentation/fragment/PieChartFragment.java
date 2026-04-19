@@ -25,11 +25,11 @@ public class PieChartFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentStatisticsPieBinding.inflate(inflater, container, false);
 
-        ChartStyleHelper.applyPieChartStyle(requireContext(), binding.pieChartOwnShared,
+        ChartStyleHelper.applyPieChartStyle(binding.pieChartOwnShared,
                 getString(R.string.statistics_own_shared));
-        ChartStyleHelper.applyPieChartStyle(requireContext(), binding.pieChartOwnStatus,
+        ChartStyleHelper.applyPieChartStyle(binding.pieChartOwnStatus,
                 getString(R.string.statistics_status_own));
-        ChartStyleHelper.applyPieChartStyle(requireContext(), binding.pieChartSharedStatus,
+        ChartStyleHelper.applyPieChartStyle( binding.pieChartSharedStatus,
                 getString(R.string.statistics_status_shared));
 
         return binding.getRoot();

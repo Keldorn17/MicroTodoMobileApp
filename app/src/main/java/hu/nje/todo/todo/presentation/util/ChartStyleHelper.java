@@ -1,31 +1,21 @@
 package hu.nje.todo.todo.presentation.util;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Color;
-import androidx.core.content.ContextCompat;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.google.android.material.color.MaterialColors;
 
 import hu.nje.todo.R;
 
 public class ChartStyleHelper {
 
-    public static int getDynamicColor(Context context, int lightColorRes, int darkColorRes) {
-        int currentNightMode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) {
-            return ContextCompat.getColor(context, darkColorRes);
-        } else {
-            return ContextCompat.getColor(context, lightColorRes);
-        }
-    }
-
-    public static void applyPieChartStyle(Context context, PieChart chart, String centerText) {
-        int textColor = getDynamicColor(context, R.color.daisy_light_base_content, R.color.daisy_dark_base_content);
+    public static void applyPieChartStyle(PieChart chart, String centerText) {
+        int textColor = MaterialColors.getColor(chart, com.google.android.material.R.attr.colorOnSurface);
 
         chart.setCenterText(centerText);
         chart.setCenterTextColor(textColor);
@@ -41,16 +31,19 @@ public class ChartStyleHelper {
         chart.getLegend().setEnabled(false);
         chart.getDescription().setEnabled(false);
         chart.setRotationEnabled(false);
+        chart.setHighlightPerTapEnabled(true);
+        chart.setMarker(new ChartMarkerView(chart.getContext(), R.layout.layout_chart_marker));
     }
 
     public static void applyGroupedBarChartStyle(Context context, BarChart chart) {
-        int textColor = getDynamicColor(context, R.color.daisy_light_base_content, R.color.daisy_dark_base_content);
+        int textColor = MaterialColors.getColor(chart, com.google.android.material.R.attr.colorOnSurface);
 
         chart.getDescription().setEnabled(false);
         chart.getLegend().setEnabled(false);
         chart.setDrawGridBackground(false);
         chart.setScaleEnabled(false);
         chart.setHighlightPerTapEnabled(true);
+        chart.setMarker(new ChartMarkerView(chart.getContext(), R.layout.layout_chart_marker));
 
         XAxis xAxis = chart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -70,18 +63,21 @@ public class ChartStyleHelper {
         YAxis leftAxis = chart.getAxisLeft();
         leftAxis.setTextColor(textColor);
         leftAxis.setAxisMinimum(0f);
-        leftAxis.setAxisMaximum(100f);
+        leftAxis.setGranularity(1f);
+        leftAxis.setGranularityEnabled(true);
         leftAxis.enableGridDashedLine(10f, 10f, 0f);
         leftAxis.setDrawAxisLine(false);
         chart.getAxisRight().setEnabled(false);
     }
 
     public static void applyStackedBarChartStyle(Context context, BarChart chart) {
-        int textColor = getDynamicColor(context, R.color.daisy_light_base_content, R.color.daisy_dark_base_content);
+        int textColor = MaterialColors.getColor(chart, com.google.android.material.R.attr.colorOnSurface);
 
         chart.getDescription().setEnabled(false);
         chart.getLegend().setEnabled(false);
         chart.setScaleEnabled(false);
+        chart.setHighlightPerTapEnabled(true);
+        chart.setMarker(new ChartMarkerView(chart.getContext(), R.layout.layout_chart_marker));
 
         XAxis xAxis = chart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -103,7 +99,8 @@ public class ChartStyleHelper {
         YAxis leftAxis = chart.getAxisLeft();
         leftAxis.setTextColor(textColor);
         leftAxis.setAxisMinimum(0f);
-        leftAxis.setAxisMaximum(120f);
+        leftAxis.setGranularity(1f);
+        leftAxis.setGranularityEnabled(true);
         leftAxis.enableGridDashedLine(10f, 10f, 0f);
         leftAxis.setDrawAxisLine(false);
         chart.getAxisRight().setEnabled(false);
