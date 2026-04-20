@@ -52,6 +52,7 @@ public class TodoListFragment extends Fragment {
 
             @Override
             public void onCheckboxToggled(Todo item, boolean isChecked) {
+                item.setCompleted(isChecked);
                 viewModel.updateTodoStatus(item.getId(), isChecked);
             }
         });
