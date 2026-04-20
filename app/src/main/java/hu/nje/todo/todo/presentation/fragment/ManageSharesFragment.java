@@ -14,7 +14,9 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -53,7 +55,7 @@ public class ManageSharesFragment extends Fragment {
         if (getArguments() != null && getArguments().containsKey("sharesJson")) {
             String sharesJson = getArguments().getString("sharesJson");
             if (sharesJson != null) {
-                java.lang.reflect.Type type = new com.google.gson.reflect.TypeToken<List<TodoShareResponse>>(){}.getType();
+                Type type = new TypeToken<List<TodoShareResponse>>(){}.getType();
                 List<TodoShareResponse> initialShares = gson.fromJson(sharesJson, type);
                 if (initialShares != null && viewModel.getShares().getValue() != null && viewModel.getShares().getValue().isEmpty()) {
                     viewModel.setInitialShares(initialShares);

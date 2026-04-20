@@ -1,5 +1,6 @@
 package hu.nje.todo.todo.presentation.viewmodel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -114,7 +115,7 @@ public class TodoListViewModel extends ViewModel {
             public void onSuccess(Todo response) {
                 TodoResponse currentResponse = todos.getValue();
                 if (currentResponse != null && currentResponse.getContent() != null) {
-                    List<Todo> currentList = new java.util.ArrayList<>(currentResponse.getContent());
+                    List<Todo> currentList = new ArrayList<>(currentResponse.getContent());
                     for (int i = 0; i < currentList.size(); i++) {
                         if (currentList.get(i).getId().equals(todoId)) {
                             currentList.set(i, response);

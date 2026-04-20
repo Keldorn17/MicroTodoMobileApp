@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -94,8 +95,8 @@ public class ShareAdapter extends RecyclerView.Adapter<ShareAdapter.ShareViewHol
                 textColorRes = R.color.daisy_dark_accent_content;
             }
 
-            int bgColor = androidx.core.content.ContextCompat.getColor(itemView.getContext(), bgColorRes);
-            int textColor = androidx.core.content.ContextCompat.getColor(itemView.getContext(), textColorRes);
+            int bgColor = ContextCompat.getColor(itemView.getContext(), bgColorRes);
+            int textColor = ContextCompat.getColor(itemView.getContext(), textColorRes);
 
             binding.tvAvatar.getBackground().mutate().setTint(bgColor);
             binding.tvAvatar.setTextColor(textColor);

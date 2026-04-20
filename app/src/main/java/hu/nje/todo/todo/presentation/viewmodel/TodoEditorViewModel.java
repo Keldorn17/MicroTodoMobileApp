@@ -48,16 +48,16 @@ public class TodoEditorViewModel extends ViewModel {
     private final MutableLiveData<Boolean> accessDenied = new MutableLiveData<>();
     
     private final MutableLiveData<java.util.Set<String>> categories = new MutableLiveData<>(new java.util.HashSet<>());
+    @lombok.Getter
+    @lombok.Setter
     private Long todoId = null;
+    @lombok.Setter
     private boolean canEdit = true;
+    @lombok.Getter
+    @lombok.Setter
     private boolean isLoaded = false;
-    private ZonedDateTime originalDeadline = null;
 
     private List<TodoShareResponse> originalShares = new ArrayList<>();
-
-    public void setOriginalDeadline(ZonedDateTime dt) {
-        this.originalDeadline = dt;
-    }
 
     @Inject
     public TodoEditorViewModel(CreateTodoUseCase createTodoUseCase, 
@@ -72,20 +72,8 @@ public class TodoEditorViewModel extends ViewModel {
         this.deleteTodoShareUseCase = deleteTodoShareUseCase;
     }
 
-    public Long getTodoId() {
-        return todoId;
-    }
-
-    public void setTodoId(Long todoId) {
-        this.todoId = todoId;
-    }
-
     public boolean canEdit() {
         return canEdit;
-    }
-
-    public void setCanEdit(boolean canEdit) {
-        this.canEdit = canEdit;
     }
 
     public LiveData<String> getErrorMessage() {
@@ -118,14 +106,6 @@ public class TodoEditorViewModel extends ViewModel {
 
     public LiveData<java.util.Set<String>> getCategories() {
         return categories;
-    }
-
-    public boolean isLoaded() {
-        return isLoaded;
-    }
-
-    public void setLoaded(boolean loaded) {
-        isLoaded = loaded;
     }
 
     public void setCategories(java.util.Set<String> newCategories) {
@@ -186,13 +166,10 @@ public class TodoEditorViewModel extends ViewModel {
         ZonedDateTime currentDeadline = deadline.getValue();
         
         if (currentDeadline != null) {
-            boolean isModified = originalDeadline == null || !currentDeadline.isEqual(originalDeadline);
-            if (isModified) {
-                ZonedDateTime now = ZonedDateTime.now(ZoneId.systemDefault());
-                if (currentDeadline.isBefore(now)) {
-                    currentDeadline = now.plusMinutes(1);
-                    deadline.postValue(currentDeadline);
-                }
+            ZonedDateTime now = ZonedDateTime.now(ZoneId.systemDefault());
+            if (currentDeadline.isBefore(now)) {
+                currentDeadline = now.plusMinutes(1);
+                deadline.postValue(currentDeadline);
             }
         }
 
@@ -221,20 +198,11 @@ public class TodoEditorViewModel extends ViewModel {
                 }
             });
         } else {
-            ZonedDateTime deadlineToSend = currentDeadline;
-            if (currentDeadline != null && originalDeadline != null) {
-                if (currentDeadline.isEqual(originalDeadline)) {
-                    deadlineToSend = null;
-                }
-            } else if (currentDeadline == null && originalDeadline == null) {
-                deadlineToSend = null;
-            }
-
             TodoUpdateRequest request = TodoUpdateRequest.builder()
                     .title(title)
                     .description(description)
                     .priority(priority)
-                    .deadline(deadlineToSend)
+                    .deadline(currentDeadline)
                     .completed(isCompleted)
                     .categories(currentCategories)
                     .build();

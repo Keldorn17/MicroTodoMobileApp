@@ -2,6 +2,8 @@ package hu.nje.todo.todo.presentation.fragment;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -22,7 +24,9 @@ import android.widget.Toast;
 
 import com.google.android.material.color.MaterialColors;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -75,7 +79,7 @@ public class TodoEditorFragment extends Fragment {
         getParentFragmentManager().setFragmentResultListener("shares_request", getViewLifecycleOwner(), (requestKey, result) -> {
             String sharesJson = result.getString("sharesJson");
             if (sharesJson != null) {
-                java.lang.reflect.Type type = new com.google.gson.reflect.TypeToken<List<TodoShareResponse>>(){}.getType();
+                Type type = new TypeToken<List<TodoShareResponse>>(){}.getType();
                 List<TodoShareResponse> updatedShares = gson.fromJson(sharesJson, type);
                 if (updatedShares != null) {
                     viewModel.setShares(updatedShares);
@@ -124,7 +128,6 @@ public class TodoEditorFragment extends Fragment {
                     if (todo.getDeadline() != null) {
                         ZonedDateTime localDeadline = todo.getDeadline().withZoneSameInstant(ZoneId.systemDefault());
                         viewModel.setDeadline(localDeadline);
-                        viewModel.setOriginalDeadline(localDeadline);
                     }
                     if (todo.getCategories() != null) {
                         viewModel.setCategories(new java.util.HashSet<>(todo.getCategories()));
@@ -358,16 +361,16 @@ public class TodoEditorFragment extends Fragment {
     private TextView createCategoryPill(String category) {
         TextView pill = new TextView(requireContext());
         pill.setText(category);
-        int secondaryColor = MaterialColors.getColor(requireContext(), com.google.android.material.R.attr.colorSecondary, android.graphics.Color.GRAY);
+        int secondaryColor = MaterialColors.getColor(requireContext(), com.google.android.material.R.attr.colorSecondary, Color.GRAY);
         pill.setTextColor(secondaryColor);
         pill.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         pill.setTypeface(null, android.graphics.Typeface.BOLD);
 
-        android.graphics.drawable.GradientDrawable shape = new android.graphics.drawable.GradientDrawable();
-        shape.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+        GradientDrawable shape = new GradientDrawable();
+        shape.setShape(GradientDrawable.RECTANGLE);
         shape.setCornerRadius(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 100, getResources().getDisplayMetrics()));
         shape.setStroke((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, getResources().getDisplayMetrics()), secondaryColor);
-        shape.setColor(android.graphics.Color.TRANSPARENT);
+        shape.setColor(Color.TRANSPARENT);
         pill.setBackground(shape);
 
         int paddingHorizontal = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12,
