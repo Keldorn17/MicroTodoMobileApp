@@ -30,7 +30,8 @@ public class TodoRepositoryImpl implements TodoRepository {
 
     @Override
     public void getTodos(SearchRequest request, TodoCallback<TodoResponse> callback) {
-        todoApi.getTodos(request.getQueryMode()).enqueue(
+        Map<String, String> params = SearchRequestMapper.toMap(request);
+        todoApi.getTodos(params).enqueue(
                 buildCallback(callback, "Failed to get Todos"));
     }
 

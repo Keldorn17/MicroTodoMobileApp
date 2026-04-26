@@ -10,11 +10,11 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import hu.nje.todo.todo.domain.model.QueryMode;
+import hu.nje.todo.todo.domain.model.SearchRequest;
 import hu.nje.todo.todo.domain.model.Todo;
 import hu.nje.todo.todo.domain.model.TodoResponse;
-import hu.nje.todo.todo.domain.model.TodoUpdateRequest;
-import hu.nje.todo.todo.domain.model.SearchRequest;
 import hu.nje.todo.todo.domain.model.TodoStatisticsResponse;
+import hu.nje.todo.todo.domain.model.TodoUpdateRequest;
 import hu.nje.todo.todo.domain.repository.TodoRepository;
 import hu.nje.todo.todo.domain.usecase.GetTodoStatisticsUseCase;
 import hu.nje.todo.todo.domain.usecase.GetTodosUseCase;
@@ -32,6 +32,7 @@ public class TodoListViewModel extends ViewModel {
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>();
     private final MutableLiveData<QueryMode> queryMode = new MutableLiveData<>();
+    private String currentSearch = "";
 
     @Inject
     public TodoListViewModel(GetTodosUseCase getTodosUseCase, PatchTodoUseCase patchTodoUseCase,
@@ -65,10 +66,25 @@ public class TodoListViewModel extends ViewModel {
         queryMode.setValue(mode);
     }
 
+    public void setSearchQuery(String query) {
+        this.currentSearch = query == null ? "" : query.trim();
+        fetchTodos();
+    }
+
+    private String getFormattedSearch() {
+        if (currentSearch.isEmpty()) {
+            return "";
+        }
+        return String.format(
+                "title=ilike='%1$s' or description=ilike='%1$s' or categories.name=ilike='%1$s'",
+                currentSearch);
+    }
+
     public void fetchTodos() {
         loading.postValue(true);
         SearchRequest request = SearchRequest.builder()
                 .queryMode(queryMode.getValue())
+                .search(getFormattedSearch())
                 .build();
         getTodosUseCase.execute(request, new TodoRepository.TodoCallback<>() {
 

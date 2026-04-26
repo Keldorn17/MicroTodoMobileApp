@@ -21,6 +21,8 @@
     <string name="label_total_count">Total: %1$d</string>
     <string name="label_finished_count">Finished: %1$d</string>
     <string name="label_unfinished_count">Unfinished: %1$d</string>
+    <string name="label_search">Search todos</string>
+    <string name="label_add_new_todo">Add new Todo</string>
 
     <string name="title_todos">Todos</string>
     <string name="title_my_todos">My Todos</string>

@@ -2,7 +2,6 @@ package hu.nje.todo.todo.data.source;
 
 import java.util.Map;
 
-import hu.nje.todo.todo.domain.model.QueryMode;
 import hu.nje.todo.todo.domain.model.Todo;
 import hu.nje.todo.todo.domain.model.TodoCreateRequest;
 import hu.nje.todo.todo.domain.model.TodoResponse;
@@ -24,19 +23,10 @@ import retrofit2.http.QueryMap;
 public interface TodoApi {
 
     @GET("/api/v1/todos")
-    Call<TodoResponse> getTodos(@Query("mode") QueryMode queryMode);
+    Call<TodoResponse> getTodos(@QueryMap Map<String, String> searchParams);
 
     @POST("/api/v1/todos")
     Call<Todo> createTodo(@Body TodoCreateRequest request);
-
-    @GET("/api/v1/todos")
-    Call<TodoResponse> getTodosForCharts(
-            @Query("mode") QueryMode mode,
-            @Query("pageNumber") Integer pageNumber,
-            @Query("pageSize") Integer pageSize,
-            @Query("search") String search,
-            @Query("sort") String sort
-    );
 
     @PATCH("/api/v1/todos/{id}")
     Call<Todo> patchTodos(@Path("id") Long id, @Body TodoUpdateRequest request);
