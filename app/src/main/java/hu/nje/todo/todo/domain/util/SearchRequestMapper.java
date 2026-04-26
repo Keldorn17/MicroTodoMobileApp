@@ -24,7 +24,7 @@ public class SearchRequestMapper {
         if (request.getPageSize() != null) {
             map.put("pageSize", String.valueOf(request.getPageSize()));
         }
-        if (request.getQueryMode() != null && request.getQueryMode() != hu.nje.todo.todo.domain.model.QueryMode.ALL) {
+        if (request.getQueryMode() != null) {
             map.put("mode", request.getQueryMode().name());
         }
         return map;

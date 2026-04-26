@@ -5,9 +5,14 @@ import com.google.gson.Gson;
 import javax.inject.Inject;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -63,10 +68,12 @@ public class TodoListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(TodoListViewModel.class);
+        initializeSwipeRefresh();
         initializeProgressBar();
         initializeRecyclerView();
         initializeTitle();
         initializeStatistics();
+        initializeSearch();
         loadArgs();
         viewModel.fetchTodos();
     }
@@ -78,10 +85,54 @@ public class TodoListFragment extends Fragment {
         viewModel = null;
     }
 
+    private void initializeSwipeRefresh() {
+        binding.swipeRefreshLayout.setOnRefreshListener(() -> viewModel.fetchTodos());
+    }
+
+    private void initializeSearch() {
+        binding.searchEditText.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
+                viewModel.setSearchQuery(v.getText().toString());
+                return true;
+            }
+            return false;
+        });
+        binding.searchEditText.addTextChangedListener(getTextWatcher());
+    }
+
+    private TextWatcher getTextWatcher() {
+        return new TextWatcher() {
+            private final Handler handler = new Handler(Looper.getMainLooper());
+            private Runnable runnable;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (runnable != null) {
+                    handler.removeCallbacks(runnable);
+                }
+                runnable = () -> viewModel.setSearchQuery(s.toString());
+                handler.postDelayed(runnable, 500);
+            }
+        };
+    }
+
     private void initializeProgressBar() {
-        viewModel.isLoading().observe(getViewLifecycleOwner(),
-                isLoading -> binding.progressBar.setVisibility(
-                        isLoading ? View.VISIBLE : View.GONE));
+        viewModel.isLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            if (!binding.swipeRefreshLayout.isRefreshing()) {
+                binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+            }
+            if (!isLoading) {
+                binding.swipeRefreshLayout.setRefreshing(false);
+            }
+        });
     }
 
     private void initializeRecyclerView() {
