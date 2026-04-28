@@ -29,7 +29,7 @@
             app:tint="@android:color/white"
             app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
             app:layout_constraintEnd_toEndOf="parent"
-            android:contentDescription="Add new Todo" />
+            android:contentDescription="@string/label_add_new_todo" />
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
                 android:id="@+id/bottomNavigationView"
@@ -39,6 +39,9 @@
                 android:elevation="0dp"
                 app:elevation="0dp"
                 app:itemActiveIndicatorStyle="@null"
+                app:itemBackground="@drawable/bottom_nav_item_ripple"
+                app:itemIconTint="@color/bottom_nav_color"
+                app:itemTextColor="@color/bottom_nav_color"
                 app:labelVisibilityMode="unlabeled"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

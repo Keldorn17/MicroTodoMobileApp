@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.navigation.fragment.ktx)
     implementation(libs.navigation.ui.ktx)
     implementation(libs.fragment)
+    implementation(libs.swiperefreshlayout)
     compileOnly(libs.lombok)
     runtimeOnly(libs.navigation.fragment)
     runtimeOnly(libs.navigation.ui)
