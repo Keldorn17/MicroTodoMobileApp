@@ -42,7 +42,7 @@
         tools:layout="@layout/fragment_todo_statistics" />
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="hu.nje.todo.todo.presentation.fragment.SettingsFragment"
+        android:name="hu.nje.todo.settings.presentation.fragment.SettingsFragment"
         android:label="fragment_settings"
         tools:layout="@layout/fragment_settings" />
     <fragment
