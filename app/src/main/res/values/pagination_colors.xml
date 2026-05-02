@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="pagination_bg_active">#00000000</color>
+    <color name="pagination_text_active">@color/daisy_light_base_content</color>
+    <color name="pagination_page_bg_clickable">@color/daisy_light_base_100</color>
+    <color name="pagination_page_text_clickable">@color/daisy_light_base_content</color>
+    <color name="pagination_nav_bg_clickable">@color/daisy_light_secondary</color>
+    <color name="pagination_nav_text_clickable">@color/daisy_light_secondary_content</color>
+    <color name="pagination_bg_unclickable">@color/daisy_light_neutral</color>
+    <color name="pagination_text_unclickable">@color/daisy_light_neutral_content</color>
+</resources>

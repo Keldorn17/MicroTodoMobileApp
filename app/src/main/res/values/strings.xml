@@ -28,6 +28,9 @@
     <string name="title_my_todos">My Todos</string>
     <string name="title_shared_todos">Shared Todos</string>
     <string name="title_all_todos">All Todos</string>
+    <string name="label_page_info">Page %1$d of %2$d</string>
+    <string name="desc_prev_page">Previous Page</string>
+    <string name="desc_next_page">Next Page</string>
     <string name="title_settings">Settings</string>
     <string name="settings_account">Account</string>
     <string name="settings_profile_settings">Profile Settings</string>

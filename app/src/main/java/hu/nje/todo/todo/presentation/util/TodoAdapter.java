@@ -1,7 +1,10 @@
 package hu.nje.todo.todo.presentation.util;
 
-import static hu.nje.todo.todo.domain.util.DateTimeFormatUtil.*;
+import static hu.nje.todo.todo.domain.util.DateTimeFormatUtil.getFormattedDate;
+import static hu.nje.todo.todo.domain.util.DateTimeFormatUtil.getFormattedTime;
 import static hu.nje.todo.todo.domain.util.PriorityUiMapper.getPriorityColorResId;
+
+import com.google.android.material.color.MaterialColors;
 
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
@@ -11,17 +14,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.color.MaterialColors;
-
 import hu.nje.todo.R;
 import hu.nje.todo.databinding.ItemTodoBinding;
+import hu.nje.todo.todo.domain.model.AccessLevel;
 import hu.nje.todo.todo.domain.model.Todo;
 
 public class TodoAdapter extends ListAdapter<Todo, TodoAdapter.TodoViewHolder> {
@@ -88,6 +88,13 @@ public class TodoAdapter extends ListAdapter<Todo, TodoAdapter.TodoViewHolder> {
         private void bindInteractions(Todo item, TodoClickListener listener) {
             binding.cbComplete.setOnCheckedChangeListener(null);
             binding.cbComplete.setChecked(item.getCompleted());
+            if (item.getAccessLevel() != null && item.getAccessLevel() == AccessLevel.READ.getValue()) {
+                binding.cbComplete.setEnabled(false);
+                binding.cbComplete.setAlpha(0.5f);
+            } else {
+                binding.cbComplete.setEnabled(true);
+                binding.cbComplete.setAlpha(1.0f);
+            }
             binding.cbComplete.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (listener != null) {
                     listener.onCheckboxToggled(item, isChecked);

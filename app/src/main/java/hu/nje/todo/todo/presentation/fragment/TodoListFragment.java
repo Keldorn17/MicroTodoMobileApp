@@ -1,5 +1,6 @@
 package hu.nje.todo.todo.presentation.fragment;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.gson.Gson;
 
 import javax.inject.Inject;
@@ -74,6 +75,7 @@ public class TodoListFragment extends Fragment {
         initializeTitle();
         initializeStatistics();
         initializeSearch();
+        initializePagination();
         loadArgs();
         viewModel.fetchTodos();
     }
@@ -83,6 +85,67 @@ public class TodoListFragment extends Fragment {
         super.onDestroyView();
         binding = null;
         viewModel = null;
+    }
+
+    private void initializePagination() {
+        viewModel.getTodos().observe(getViewLifecycleOwner(), response -> {
+            if (response != null && response.getPage() != null) {
+                int totalPages = response.getPage().getTotalPages() != null
+                                 ? response.getPage().getTotalPages() : 1;
+                int currentPage =
+                        response.getPage().getNumber() != null ? response.getPage().getNumber() : 0;
+                if (totalPages > 0) {
+                    binding.paginationGroup.setVisibility(View.VISIBLE);
+                    updatePaginationUI(currentPage, totalPages);
+                } else {
+                    binding.paginationGroup.setVisibility(View.GONE);
+                }
+            } else {
+                binding.paginationGroup.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void updatePaginationUI(int currentPage, int totalPages) {
+        binding.btnPrev.setEnabled(currentPage > 0);
+        binding.btnPrev.setOnClickListener(v -> {
+            viewModel.setPage(currentPage - 1);
+            binding.nestedScrollView.scrollTo(0, 0);
+        });
+        binding.btnNext.setEnabled(currentPage < totalPages - 1);
+        binding.btnNext.setOnClickListener(v -> {
+            viewModel.setPage(currentPage + 1);
+            binding.nestedScrollView.scrollTo(0, 0);
+        });
+        int maxPagesToShow = 3;
+        int startPage = Math.max(0, currentPage - 1);
+        int endPage = Math.min(totalPages - 1, startPage + maxPagesToShow - 1);
+        startPage = Math.max(0, endPage - maxPagesToShow + 1);
+        MaterialButton[] pageButtons = {
+                binding.btnPage1, binding.btnPage2, binding.btnPage3
+        };
+        configureEachElement(currentPage, pageButtons, startPage, endPage);
+    }
+
+    private void configureEachElement(int currentPage, MaterialButton[] pageButtons, int startPage,
+            int endPage) {
+        for (int i = 0; i < pageButtons.length; i++) {
+            int pageIndex = startPage + i;
+            MaterialButton btn = pageButtons[i];
+            if (pageIndex <= endPage) {
+                btn.setVisibility(View.VISIBLE);
+                btn.setText(String.valueOf(pageIndex + 1));
+                btn.setChecked(pageIndex == currentPage);
+                final int targetPage = pageIndex;
+                btn.setOnClickListener(v -> {
+                    viewModel.setPage(targetPage);
+                    binding.nestedScrollView.scrollTo(0, 0);
+                });
+                btn.setClickable(pageIndex != currentPage);
+            } else {
+                btn.setVisibility(View.GONE);
+            }
+        }
     }
 
     private void initializeSwipeRefresh() {
@@ -118,7 +181,11 @@ public class TodoListFragment extends Fragment {
                 if (runnable != null) {
                     handler.removeCallbacks(runnable);
                 }
-                runnable = () -> viewModel.setSearchQuery(s.toString());
+                runnable = () -> {
+                    if (viewModel != null) {
+                        viewModel.setSearchQuery(s.toString());
+                    }
+                };
                 handler.postDelayed(runnable, 500);
             }
         };
