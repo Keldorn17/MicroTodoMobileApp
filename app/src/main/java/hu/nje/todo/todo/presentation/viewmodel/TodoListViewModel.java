@@ -33,6 +33,7 @@ public class TodoListViewModel extends ViewModel {
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>();
     private final MutableLiveData<QueryMode> queryMode = new MutableLiveData<>();
     private String currentSearch = "";
+    private int currentPage = 0;
 
     @Inject
     public TodoListViewModel(GetTodosUseCase getTodosUseCase, PatchTodoUseCase patchTodoUseCase,
@@ -64,10 +65,12 @@ public class TodoListViewModel extends ViewModel {
 
     public void setQueryMode(QueryMode mode) {
         queryMode.setValue(mode);
+        this.currentPage = 0;
     }
 
     public void setSearchQuery(String query) {
         this.currentSearch = query == null ? "" : query.trim();
+        this.currentPage = 0;
         fetchTodos();
     }
 
@@ -85,6 +88,7 @@ public class TodoListViewModel extends ViewModel {
         SearchRequest request = SearchRequest.builder()
                 .queryMode(queryMode.getValue())
                 .search(getFormattedSearch())
+                .pageNumber(currentPage)
                 .build();
         getTodosUseCase.execute(request, new TodoRepository.TodoCallback<>() {
 
@@ -104,9 +108,22 @@ public class TodoListViewModel extends ViewModel {
         });
     }
 
+    public void setPage(int page) {
+        TodoResponse response = todos.getValue();
+        if (response != null && response.getPage() != null) {
+            int totalPages =
+                    response.getPage().getTotalPages() != null ? response.getPage().getTotalPages() : 1;
+            if (page >= 0 && page < totalPages && page != currentPage) {
+                currentPage = page;
+                fetchTodos();
+            }
+        }
+    }
+
     public void fetchStatistics() {
         SearchRequest request = SearchRequest.builder()
                 .queryMode(queryMode.getValue())
+                .search(getFormattedSearch())
                 .build();
         getTodoStatisticsUseCase.execute(request, null,
                 new TodoRepository.TodoCallback<>() {

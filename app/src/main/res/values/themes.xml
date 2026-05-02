@@ -26,6 +26,26 @@
 
     <style name="Theme.TodoApp" parent="Base.Theme.TodoApp" />
 
+    <style name="Widget.TodoApp.PaginationButton" parent="Widget.Material3.Button.TonalButton">
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingHorizontal">18dp</item>
+        <item name="android:paddingVertical">10dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="backgroundTint">@color/selector_pagination_page_bg</item>
+        <item name="android:textColor">@color/selector_pagination_page_text</item>
+        <item name="rippleColor">?attr/colorControlHighlight</item>
+    </style>
+
+    <style name="Widget.TodoApp.PaginationButton.Nav">
+        <item name="backgroundTint">@color/selector_pagination_nav_bg</item>
+        <item name="android:textColor">@color/selector_pagination_nav_text</item>
+    </style>
+
     <style name="ThemeOverlay.TodoApp.SearchBar" parent="">
         <item name="colorPrimary">?attr/colorOnSurface</item>
         <item name="colorControlActivated">?attr/colorOnSurface</item>
