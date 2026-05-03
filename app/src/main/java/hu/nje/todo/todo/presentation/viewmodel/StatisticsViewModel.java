@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import hu.nje.todo.R;
 import dagger.hilt.android.lifecycle.HiltViewModel;
+import hu.nje.todo.todo.domain.model.Priority;
 import hu.nje.todo.todo.domain.model.QueryMode;
 import hu.nje.todo.todo.domain.model.SearchRequest;
 import hu.nje.todo.todo.domain.model.TodoStatisticsEntryResponse;
@@ -122,8 +123,7 @@ public class StatisticsViewModel extends AndroidViewModel {
             @Override
             public void onSuccess(TodoStatisticsResponse response) {
                 if (response != null && response.getStatistics() != null) {
-                    stackedBarData.postValue(createStackedBarData(response.getStatistics()));
-
+                    stackedBarData.postValue(createStackedBarData(response));
                 }
             }
 
@@ -179,12 +179,13 @@ public class StatisticsViewModel extends AndroidViewModel {
         return data;
     }
 
-    private BarData createStackedBarData(Map<String, TodoStatisticsEntryResponse> stats) {
+    private BarData createStackedBarData(TodoStatisticsResponse response) {
         ArrayList<BarEntry> entries = new ArrayList<>();
+        Map<String, TodoStatisticsEntryResponse> stats = response.getStatistics();
 
-        String[] labels = {"Not required", "Low", "Normal", "High", "Critical"};
-        for (int i = 0; i < labels.length; i++) {
-            TodoStatisticsEntryResponse entry = stats.get(labels[i]);
+        Priority[] values = Priority.values();
+        for (int i = 0; i < values.length; i++) {
+            TodoStatisticsEntryResponse entry = stats != null ? stats.get(values[i].getDisplayName()) : null;
             float finished = 0, unfinished = 0;
             if (entry != null) {
                 finished = entry.getFinished() != null ? entry.getFinished().floatValue() : 0f;

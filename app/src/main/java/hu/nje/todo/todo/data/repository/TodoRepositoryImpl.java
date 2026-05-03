@@ -3,7 +3,7 @@ package hu.nje.todo.todo.data.repository;
 import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
-
+import java.util.function.Function;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import hu.nje.todo.todo.data.source.TodoApi;
@@ -13,6 +13,7 @@ import hu.nje.todo.todo.domain.model.TodoCreateRequest;
 import hu.nje.todo.todo.domain.model.TodoResponse;
 import hu.nje.todo.todo.domain.model.TodoShareRequest;
 import hu.nje.todo.todo.domain.model.TodoSharesResponse;
+import hu.nje.todo.todo.domain.model.TodoStatisticsEntryResponse;
 import hu.nje.todo.todo.domain.model.TodoStatisticsResponse;
 import hu.nje.todo.todo.domain.model.TodoUpdateRequest;
 import hu.nje.todo.todo.domain.repository.TodoRepository;
@@ -67,18 +68,29 @@ public class TodoRepositoryImpl implements TodoRepository {
 
     @Override
     public void getStatistics(SearchRequest request, String groupBy,
-            TodoCallback<TodoStatisticsResponse> callback) {
+                              TodoCallback<TodoStatisticsResponse> callback) {
         Map<String, String> params = SearchRequestMapper.toMap(request);
-        todoApi.getStatistics(params, groupBy).enqueue(
-                buildCallback(callback, "Failed to get todo statistics"));
+        if (groupBy == null) {
+            todoApi.getStatistics(params).enqueue(
+                    buildCallback(callback, "Failed to get todo statistics"));
+        } else {
+            todoApi.getPriorityStatistics(params, groupBy).enqueue(
+                    buildMappedCallback(callback, "Failed to get todo priority statistics",
+                            body -> TodoStatisticsResponse.builder().statistics(body).build()));
+        }
     }
 
     private <T> Callback<T> buildCallback(TodoCallback<T> callback, String errorMessage) {
+        return buildMappedCallback(callback, errorMessage, Function.identity());
+    }
+
+    private <T, R> Callback<T> buildMappedCallback(TodoCallback<R> callback, String errorMessage,
+                                                   Function<T, R> mapper) {
         return new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<T> call, @NonNull Response<T> response) {
                 if (response.isSuccessful()) {
-                    callback.onSuccess(response.body());
+                    callback.onSuccess(mapper.apply(response.body()));
                 } else {
                     Log.e(TAG, "onResponse: " + errorMessage + " status code: " + response.code());
                     callback.onError(errorMessage);
@@ -86,8 +98,7 @@ public class TodoRepositoryImpl implements TodoRepository {
             }
 
             @Override
-            public void onFailure(@NonNull Call<T> call,
-                    @NonNull Throwable throwable) {
+            public void onFailure(@NonNull Call<T> call, @NonNull Throwable throwable) {
                 Log.e(TAG, "onFailure: Network error", throwable);
                 callback.onError("Network error: " + throwable.getMessage());
             }
