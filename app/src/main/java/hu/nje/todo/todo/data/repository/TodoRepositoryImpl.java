@@ -36,6 +36,11 @@ public class TodoRepositoryImpl implements TodoRepository {
     }
 
     @Override
+    public void getTodo(Long id, TodoCallback<Todo> callback) {
+        todoApi.getTodo(id).enqueue(buildCallback(callback, "Failed to get Todo by id: " + id));
+    }
+
+    @Override
     public void createTodo(TodoCreateRequest request, TodoCallback<Todo> callback) {
         todoApi.createTodo(request).enqueue(buildCallback(callback, "Failed to create Todo"));
     }
@@ -45,6 +50,12 @@ public class TodoRepositoryImpl implements TodoRepository {
             TodoCallback<Todo> callback) {
         todoApi.patchTodos(todoId, request).enqueue(
                 buildCallback(callback, "Failed to patch Todo by id: " + todoId));
+    }
+
+    @Override
+    public void deleteTodo(Long todoId, TodoCallback<Void> callback) {
+        todoApi.deleteTodo(todoId).enqueue(
+                buildCallback(callback, "Failed to delete Todo by id: " + todoId));
     }
 
     @Override

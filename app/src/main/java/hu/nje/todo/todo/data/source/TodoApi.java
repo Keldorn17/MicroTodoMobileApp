@@ -25,11 +25,17 @@ public interface TodoApi {
     @GET("/api/v1/todos")
     Call<TodoResponse> getTodos(@QueryMap Map<String, String> searchParams);
 
+    @GET("/api/v1/todos/{id}")
+    Call<Todo> getTodo(@Path("id") Long id);
+
     @POST("/api/v1/todos")
     Call<Todo> createTodo(@Body TodoCreateRequest request);
 
     @PATCH("/api/v1/todos/{id}")
     Call<Todo> patchTodos(@Path("id") Long id, @Body TodoUpdateRequest request);
+
+    @DELETE("/api/v1/todos/{id}")
+    Call<Void> deleteTodo(@Path("id") Long id);
 
     @GET("/api/v1/todos/{todoId}/share")
     Call<TodoSharesResponse> getTodoShares(@Path("todoId") Long todoId, @Query("page") int page,

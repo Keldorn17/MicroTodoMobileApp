@@ -13,9 +13,13 @@ public interface TodoRepository {
 
     void getTodos(SearchRequest request, TodoCallback<TodoResponse> callback);
 
+    void getTodo(Long id, TodoCallback<Todo> callback);
+
     void createTodo(TodoCreateRequest request, TodoCallback<Todo> callback);
 
     void patchTodo(Long todoId, TodoUpdateRequest request, TodoCallback<Todo> callback);
+
+    void deleteTodo(Long todoId, TodoCallback<Void> callback);
 
     void getTodoShares(Long todoId, int page, int size, TodoCallback<TodoSharesResponse> callback);
 

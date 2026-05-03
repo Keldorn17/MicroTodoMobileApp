@@ -28,7 +28,9 @@ import hu.nje.todo.todo.domain.model.TodoUpdateRequest;
 import hu.nje.todo.todo.domain.repository.TodoRepository;
 import hu.nje.todo.todo.domain.usecase.CreateTodoUseCase;
 import hu.nje.todo.todo.domain.usecase.DeleteTodoShareUseCase;
+import hu.nje.todo.todo.domain.usecase.DeleteTodoUseCase;
 import hu.nje.todo.todo.domain.usecase.GetTodoSharesUseCase;
+import hu.nje.todo.todo.domain.usecase.GetTodoUseCase;
 import hu.nje.todo.todo.domain.usecase.PatchTodoUseCase;
 import hu.nje.todo.todo.domain.usecase.ShareTodoUseCase;
 
@@ -40,10 +42,13 @@ public class TodoEditorViewModel extends ViewModel {
     private final GetTodoSharesUseCase getTodoSharesUseCase;
     private final ShareTodoUseCase shareTodoUseCase;
     private final DeleteTodoShareUseCase deleteTodoShareUseCase;
+    private final GetTodoUseCase getTodoUseCase;
+    private final DeleteTodoUseCase deleteTodoUseCase;
 
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>();
     private final MutableLiveData<Boolean> success = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> deleted = new MutableLiveData<>();
 
     private final MutableLiveData<ZonedDateTime> deadline = new MutableLiveData<>();
 
@@ -53,6 +58,7 @@ public class TodoEditorViewModel extends ViewModel {
     private final MutableLiveData<Boolean> accessDenied = new MutableLiveData<>();
 
     private final MutableLiveData<Set<String>> categories = new MutableLiveData<>(new HashSet<>());
+    private final MutableLiveData<Todo> loadedTodo = new MutableLiveData<>();
 
     @Getter
     @Setter
@@ -72,12 +78,16 @@ public class TodoEditorViewModel extends ViewModel {
             PatchTodoUseCase patchTodoUseCase,
             GetTodoSharesUseCase getTodoSharesUseCase,
             ShareTodoUseCase shareTodoUseCase,
-            DeleteTodoShareUseCase deleteTodoShareUseCase) {
+            DeleteTodoShareUseCase deleteTodoShareUseCase,
+            GetTodoUseCase getTodoUseCase,
+            DeleteTodoUseCase deleteTodoUseCase) {
         this.createTodoUseCase = createTodoUseCase;
         this.patchTodoUseCase = patchTodoUseCase;
         this.getTodoSharesUseCase = getTodoSharesUseCase;
         this.shareTodoUseCase = shareTodoUseCase;
         this.deleteTodoShareUseCase = deleteTodoShareUseCase;
+        this.getTodoUseCase = getTodoUseCase;
+        this.deleteTodoUseCase = deleteTodoUseCase;
     }
 
     public boolean canEdit() {
@@ -94,6 +104,10 @@ public class TodoEditorViewModel extends ViewModel {
 
     public LiveData<Boolean> isSuccess() {
         return success;
+    }
+
+    public LiveData<Boolean> isDeleted() {
+        return deleted;
     }
 
     public LiveData<ZonedDateTime> getDeadline() {
@@ -114,6 +128,36 @@ public class TodoEditorViewModel extends ViewModel {
 
     public LiveData<Set<String>> getCategories() {
         return categories;
+    }
+
+    public LiveData<Todo> getLoadedTodo() {
+        return loadedTodo;
+    }
+
+    public void loadTodoData(Long id) {
+        if (id == null) {
+            return;
+        }
+        loading.postValue(true);
+        getTodoUseCase.execute(id, new TodoRepository.TodoCallback<>() {
+            @Override
+            public void onSuccess(Todo response) {
+                loading.postValue(false);
+                if (response != null) {
+                    loadedTodo.postValue(response);
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                loading.postValue(false);
+                errorMessage.postValue(message);
+            }
+        });
+    }
+
+    public void clearLoadedTodo() {
+        loadedTodo.setValue(null);
     }
 
     public void setCategories(Set<String> newCategories) {
@@ -210,6 +254,26 @@ public class TodoEditorViewModel extends ViewModel {
                 }
             });
         }
+    }
+
+    public void deleteTodo() {
+        if (todoId == null) {
+            return;
+        }
+        loading.postValue(true);
+        deleteTodoUseCase.execute(todoId, new TodoRepository.TodoCallback<>() {
+            @Override
+            public void onSuccess(Void response) {
+                loading.postValue(false);
+                deleted.postValue(true);
+            }
+
+            @Override
+            public void onError(String message) {
+                loading.postValue(false);
+                errorMessage.postValue(message);
+            }
+        });
     }
 
     private void saveShares(Long savedTodoId) {
