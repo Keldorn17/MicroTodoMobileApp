@@ -13,6 +13,7 @@ import hu.nje.todo.todo.domain.model.TodoCreateRequest;
 import hu.nje.todo.todo.domain.model.TodoResponse;
 import hu.nje.todo.todo.domain.model.TodoShareRequest;
 import hu.nje.todo.todo.domain.model.TodoSharesResponse;
+import hu.nje.todo.todo.domain.model.TodoStatisticsEntryResponse;
 import hu.nje.todo.todo.domain.model.TodoStatisticsResponse;
 import hu.nje.todo.todo.domain.model.TodoUpdateRequest;
 import hu.nje.todo.todo.domain.repository.TodoRepository;
@@ -69,8 +70,33 @@ public class TodoRepositoryImpl implements TodoRepository {
     public void getStatistics(SearchRequest request, String groupBy,
             TodoCallback<TodoStatisticsResponse> callback) {
         Map<String, String> params = SearchRequestMapper.toMap(request);
-        todoApi.getStatistics(params, groupBy).enqueue(
-                buildCallback(callback, "Failed to get todo statistics"));
+        
+        if (groupBy == null) {
+            todoApi.getStatistics(params).enqueue(
+                    buildCallback(callback, "Failed to get todo statistics"));
+        } else {
+            todoApi.getPriorityStatistics(params, groupBy).enqueue(new Callback<Map<String, TodoStatisticsEntryResponse>>() {
+                @Override
+                public void onResponse(@NonNull Call<Map<String, TodoStatisticsEntryResponse>> call, 
+                                     @NonNull Response<Map<String, TodoStatisticsEntryResponse>> response) {
+                    if (response.isSuccessful()) {
+                        TodoStatisticsResponse wrappedResponse = TodoStatisticsResponse.builder()
+                                .statistics(response.body())
+                                .build();
+                        callback.onSuccess(wrappedResponse);
+                    } else {
+                        Log.e(TAG, "onResponse: Failed to get todo priority statistics status code: " + response.code());
+                        callback.onError("Failed to get todo priority statistics");
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<Map<String, TodoStatisticsEntryResponse>> call, @NonNull Throwable throwable) {
+                    Log.e(TAG, "onFailure: Network error", throwable);
+                    callback.onError("Network error: " + throwable.getMessage());
+                }
+            });
+        }
     }
 
     private <T> Callback<T> buildCallback(TodoCallback<T> callback, String errorMessage) {

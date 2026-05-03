@@ -7,6 +7,7 @@ import hu.nje.todo.todo.domain.model.TodoCreateRequest;
 import hu.nje.todo.todo.domain.model.TodoResponse;
 import hu.nje.todo.todo.domain.model.TodoShareRequest;
 import hu.nje.todo.todo.domain.model.TodoSharesResponse;
+import hu.nje.todo.todo.domain.model.TodoStatisticsEntryResponse;
 import hu.nje.todo.todo.domain.model.TodoStatisticsResponse;
 import hu.nje.todo.todo.domain.model.TodoUpdateRequest;
 import retrofit2.Call;
@@ -42,7 +43,11 @@ public interface TodoApi {
     Call<Void> deleteTodoShare(@Path("todoId") Long todoId, @Query("email") String email);
 
     @GET("/api/v1/todos/statistics")
-    Call<TodoStatisticsResponse> getStatistics(@QueryMap Map<String, String> searchParams,
+    Call<TodoStatisticsResponse> getStatistics(@QueryMap Map<String, String> searchParams);
+
+    @GET("/api/v1/todos/statistics")
+    Call<Map<String, TodoStatisticsEntryResponse>> getPriorityStatistics(
+            @QueryMap Map<String, String> searchParams,
             @Query("groupBy") String groupBy);
 
 }

@@ -15,10 +15,8 @@ import dagger.hilt.components.SingletonComponent;
 import hu.nje.todo.core.data.AuthInterceptor;
 import hu.nje.todo.todo.data.repository.TodoRepositoryImpl;
 import hu.nje.todo.todo.data.source.TodoApi;
-import hu.nje.todo.todo.domain.json.TodoStatisticsResponseDeserializer;
 import hu.nje.todo.todo.domain.json.ZonedDateTimeDeserializer;
 import hu.nje.todo.todo.domain.json.ZonedDateTimeSerializer;
-import hu.nje.todo.todo.domain.model.TodoStatisticsResponse;
 import hu.nje.todo.todo.domain.repository.TodoRepository;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -42,7 +40,6 @@ public class TodoModule {
         return new GsonBuilder()
                 .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeDeserializer())
                 .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeSerializer())
-                .registerTypeAdapter(TodoStatisticsResponse.class, new TodoStatisticsResponseDeserializer())
                 .create();
     }
 
