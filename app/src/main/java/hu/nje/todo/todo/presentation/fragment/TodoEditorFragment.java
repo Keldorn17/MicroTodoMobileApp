@@ -50,8 +50,6 @@ public class TodoEditorFragment extends Fragment {
     private FragmentTodoEditorBinding binding;
     private TodoEditorViewModel viewModel;
 
-    @Inject
-    Gson gson;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -73,13 +71,8 @@ public class TodoEditorFragment extends Fragment {
                 });
         getParentFragmentManager().setFragmentResultListener("shares_request",
                 getViewLifecycleOwner(), (requestKey, result) -> {
-                    String sharesJson = result.getString("sharesJson");
-                    if (sharesJson != null) {
-                        Type type = new TypeToken<List<TodoShareResponse>>() {}.getType();
-                        List<TodoShareResponse> updatedShares = gson.fromJson(sharesJson, type);
-                        if (updatedShares != null) {
-                            viewModel.setShares(updatedShares);
-                        }
+                    if (viewModel.getTodoId() != null) {
+                        viewModel.loadShares(viewModel.getTodoId());
                     }
                 });
         setupPrioritySpinner();
@@ -91,9 +84,13 @@ public class TodoEditorFragment extends Fragment {
             if (viewModel.getTodoId() != null) {
                 binding.tvHeadline.setText("Edit Todo");
                 binding.btnSave.setText("Save Todo");
+                binding.btnDelete.setVisibility(View.VISIBLE);
             }
             if (!viewModel.canEdit()) {
                 disableEditing();
+            }
+            if (!viewModel.canDelete()) {
+                binding.btnDelete.setEnabled(false);
             }
         }
     }
@@ -102,35 +99,11 @@ public class TodoEditorFragment extends Fragment {
         if (viewModel.isLoaded()) {
             return;
         }
-        if (getArguments() != null && getArguments().containsKey("todoJson")) {
-            String todoJson = getArguments().getString("todoJson");
-            if (todoJson != null && !todoJson.equals("null")) {
-                Todo todo = gson.fromJson(todoJson, Todo.class);
-                if (todo != null) {
-                    viewModel.setTodoId(todo.getId());
-                    binding.tvHeadline.setText("Edit Todo");
-                    binding.btnSave.setText("Save Todo");
-                    binding.etTitle.setText(todo.getTitle());
-                    binding.etDescription.setText(todo.getDescription());
-                    if (todo.getCompleted() != null) {
-                        binding.cbCompleted.setChecked(todo.getCompleted());
-                    }
-                    Priority priority = Priority.fromValue(todo.getPriority());
-                    binding.spinnerPriority.setSelection(priority.ordinal());
-                    if (todo.getDeadline() != null) {
-                        ZonedDateTime localDeadline =
-                                todo.getDeadline().withZoneSameInstant(ZoneId.systemDefault());
-                        viewModel.setDeadline(localDeadline);
-                    }
-                    if (todo.getCategories() != null) {
-                        viewModel.setCategories(new HashSet<>(todo.getCategories()));
-                    }
-                    if (todo.getAccessLevel() != null && todo.getAccessLevel() == AccessLevel.READ.getValue()) {
-                        viewModel.setCanEdit(false);
-                        disableEditing();
-                    }
-                    viewModel.loadShares(viewModel.getTodoId());
-                }
+        if (getArguments() != null && getArguments().containsKey("todoId")) {
+            Long todoId = getArguments().getLong("todoId");
+            if (todoId != 0L) {
+                viewModel.setTodoId(todoId);
+                viewModel.loadTodoData(todoId);
             }
         }
         viewModel.setLoaded(true);
@@ -144,6 +117,7 @@ public class TodoEditorFragment extends Fragment {
         binding.btnDeadlineDate.setEnabled(false);
         binding.btnDeadlineTime.setEnabled(false);
         binding.btnSave.setVisibility(View.GONE);
+        binding.btnDelete.setEnabled(false);
         binding.cardManageCategories.setClickable(false);
         binding.tvManageCategoriesTitle.setText("View Categories");
         binding.cardManageShares.setClickable(false);
@@ -196,13 +170,22 @@ public class TodoEditorFragment extends Fragment {
                     R.id.action_todoEditorFragment_to_manageCategoriesFragment, args);
         });
         binding.cardManageShares.setOnClickListener(v -> {
-            Bundle args = new Bundle();
-            List<TodoShareResponse> currentShares = viewModel.getShares().getValue();
-            if (currentShares != null) {
-                args.putString("sharesJson", gson.toJson(currentShares));
+            if (viewModel.getTodoId() == null) {
+                Toast.makeText(requireContext(), "Please save the Todo first before managing shares.", Toast.LENGTH_SHORT).show();
+                return;
             }
+            Bundle args = new Bundle();
+            args.putLong("todoId", viewModel.getTodoId());
             Navigation.findNavController(v).navigate(
                     R.id.action_todoEditorFragment_to_manageSharesFragment, args);
+        });
+        binding.btnDelete.setOnClickListener(v -> {
+            new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Delete Todo")
+                    .setMessage("Are you sure you want to delete this todo?")
+                    .setPositiveButton("Delete", (dialog, which) -> viewModel.deleteTodo())
+                    .setNegativeButton("Cancel", null)
+                    .show();
         });
     }
 
@@ -277,6 +260,40 @@ public class TodoEditorFragment extends Fragment {
     }
 
     private void observeViewModel() {
+        viewModel.getLoadedTodo().observe(getViewLifecycleOwner(), todo -> {
+            if (todo != null) {
+                binding.tvHeadline.setText("Edit Todo");
+                binding.btnSave.setText("Save Todo");
+                binding.btnDelete.setVisibility(View.VISIBLE);
+                binding.etTitle.setText(todo.getTitle());
+                binding.etDescription.setText(todo.getDescription());
+                if (todo.getCompleted() != null) {
+                    binding.cbCompleted.setChecked(todo.getCompleted());
+                }
+                Priority priority = Priority.fromValue(todo.getPriority());
+                binding.spinnerPriority.setSelection(priority.ordinal());
+                if (todo.getDeadline() != null) {
+                    ZonedDateTime localDeadline =
+                            todo.getDeadline().withZoneSameInstant(ZoneId.systemDefault());
+                    viewModel.setDeadline(localDeadline);
+                }
+                if (todo.getCategories() != null) {
+                    viewModel.setCategories(new HashSet<>(todo.getCategories()));
+                }
+                if (todo.getAccessLevel() != null) {
+                    if (todo.getAccessLevel() == AccessLevel.READ.getValue()) {
+                        viewModel.setCanEdit(false);
+                        viewModel.setCanDelete(false);
+                        disableEditing();
+                    } else if (todo.getAccessLevel() == AccessLevel.WRITE.getValue()) {
+                        viewModel.setCanDelete(false);
+                        binding.btnDelete.setEnabled(false);
+                    }
+                }
+                viewModel.loadShares(viewModel.getTodoId());
+                viewModel.clearLoadedTodo();
+            }
+        });
         viewModel.getDeadline().observe(getViewLifecycleOwner(), dt -> {
             if (dt != null) {
                 binding.btnDeadlineDate.setText(dt.toLocalDate().toString());
@@ -309,6 +326,13 @@ public class TodoEditorFragment extends Fragment {
         viewModel.isSuccess().observe(getViewLifecycleOwner(), isSuccess -> {
             if (isSuccess != null && isSuccess) {
                 Toast.makeText(requireContext(), "Todo saved successfully",
+                        Toast.LENGTH_SHORT).show();
+                Navigation.findNavController(binding.getRoot()).popBackStack();
+            }
+        });
+        viewModel.isDeleted().observe(getViewLifecycleOwner(), isDeleted -> {
+            if (isDeleted != null && isDeleted) {
+                Toast.makeText(requireContext(), "Todo deleted successfully",
                         Toast.LENGTH_SHORT).show();
                 Navigation.findNavController(binding.getRoot()).popBackStack();
             }

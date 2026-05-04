@@ -34,9 +34,6 @@ public class TodoListFragment extends Fragment {
     private TodoListViewModel viewModel;
     private TodoAdapter adapter;
 
-    @Inject
-    Gson gson;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,9 +46,8 @@ public class TodoListFragment extends Fragment {
         adapter = new TodoAdapter(new TodoAdapter.TodoClickListener() {
             @Override
             public void onCardClicked(Todo item) {
-                String todoJson = gson.toJson(item);
                 Bundle bundle = new Bundle();
-                bundle.putString("todoJson", todoJson);
+                bundle.putLong("todoId", item.getId());
                 Navigation.findNavController(binding.getRoot())
                         .navigate(R.id.todoEditorFragment, bundle);
             }
