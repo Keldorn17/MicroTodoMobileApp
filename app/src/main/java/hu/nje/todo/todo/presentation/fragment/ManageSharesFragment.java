@@ -13,10 +13,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import java.lang.reflect.Type;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -37,9 +33,6 @@ public class ManageSharesFragment extends Fragment {
     private ManageSharesViewModel viewModel;
     private ShareAdapter shareAdapter;
 
-    @Inject
-    Gson gson;
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -52,15 +45,10 @@ public class ManageSharesFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(ManageSharesViewModel.class);
 
-        if (getArguments() != null && getArguments().containsKey("sharesJson")) {
-            String sharesJson = getArguments().getString("sharesJson");
-            if (sharesJson != null) {
-                Type type = new TypeToken<List<TodoShareResponse>>(){}.getType();
-                List<TodoShareResponse> initialShares = gson.fromJson(sharesJson, type);
-                if (initialShares != null && viewModel.getShares().getValue() != null && viewModel.getShares().getValue().isEmpty()) {
-                    viewModel.setInitialShares(initialShares);
-                }
-            }
+        if (getArguments() != null && getArguments().containsKey("todoId")) {
+            Long todoId = getArguments().getLong("todoId");
+            viewModel.setTodoId(todoId);
+            viewModel.loadShares();
         }
 
         setupRecyclerView();
@@ -96,12 +84,12 @@ public class ManageSharesFragment extends Fragment {
         shareAdapter = new ShareAdapter(new ShareAdapter.OnShareActionListener() {
             @Override
             public void onDeleteShare(TodoShareResponse share) {
-                viewModel.deleteShareLocal(share.getEmail());
+                viewModel.deleteShare(share.getEmail());
             }
 
             @Override
             public void onUpdateAccessLevel(TodoShareResponse share, int newLevel) {
-                viewModel.shareTodoLocal(share.getEmail(), newLevel);
+                viewModel.shareTodo(share.getEmail(), newLevel);
             }
         });
         binding.rvShares.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -111,12 +99,7 @@ public class ManageSharesFragment extends Fragment {
     private void setupClickListeners() {
         binding.btnBack.setOnClickListener(v -> Navigation.findNavController(v).popBackStack());
         binding.btnDone.setOnClickListener(v -> {
-            List<TodoShareResponse> currentShares = viewModel.getShares().getValue();
-            if (currentShares != null) {
-                Bundle result = new Bundle();
-                result.putString("sharesJson", gson.toJson(currentShares));
-                getParentFragmentManager().setFragmentResult("shares_request", result);
-            }
+            getParentFragmentManager().setFragmentResult("shares_request", new Bundle());
             Navigation.findNavController(v).popBackStack();
         });
 
@@ -132,7 +115,7 @@ public class ManageSharesFragment extends Fragment {
             int selectedPosition = binding.spinnerAccessLevel.getSelectedItemPosition();
             AccessLevel selectedLevel = AccessLevel.values()[selectedPosition];
 
-            viewModel.shareTodoLocal(email, selectedLevel.getValue());
+            viewModel.shareTodo(email, selectedLevel.getValue());
             binding.etShareEmail.setText("");
         });
     }
@@ -141,8 +124,16 @@ public class ManageSharesFragment extends Fragment {
         viewModel.getShares().observe(getViewLifecycleOwner(), shares -> {
             shareAdapter.setShares(shares);
         });
-
-        binding.sharesProgressBar.setVisibility(View.GONE);
+        
+        viewModel.isLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            binding.sharesProgressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        });
+        
+        viewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
+            if (error != null && !error.isEmpty()) {
+                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override

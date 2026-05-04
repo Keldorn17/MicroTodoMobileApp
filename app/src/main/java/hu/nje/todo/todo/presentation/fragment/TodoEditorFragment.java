@@ -73,13 +73,8 @@ public class TodoEditorFragment extends Fragment {
                 });
         getParentFragmentManager().setFragmentResultListener("shares_request",
                 getViewLifecycleOwner(), (requestKey, result) -> {
-                    String sharesJson = result.getString("sharesJson");
-                    if (sharesJson != null) {
-                        Type type = new TypeToken<List<TodoShareResponse>>() {}.getType();
-                        List<TodoShareResponse> updatedShares = gson.fromJson(sharesJson, type);
-                        if (updatedShares != null) {
-                            viewModel.setShares(updatedShares);
-                        }
+                    if (viewModel.getTodoId() != null) {
+                        viewModel.loadShares(viewModel.getTodoId());
                     }
                 });
         setupPrioritySpinner();
@@ -91,9 +86,13 @@ public class TodoEditorFragment extends Fragment {
             if (viewModel.getTodoId() != null) {
                 binding.tvHeadline.setText("Edit Todo");
                 binding.btnSave.setText("Save Todo");
+                binding.btnDelete.setVisibility(View.VISIBLE);
             }
             if (!viewModel.canEdit()) {
                 disableEditing();
+            }
+            if (!viewModel.canDelete()) {
+                binding.btnDelete.setEnabled(false);
             }
         }
     }
@@ -120,6 +119,7 @@ public class TodoEditorFragment extends Fragment {
         binding.btnDeadlineDate.setEnabled(false);
         binding.btnDeadlineTime.setEnabled(false);
         binding.btnSave.setVisibility(View.GONE);
+        binding.btnDelete.setEnabled(false);
         binding.cardManageCategories.setClickable(false);
         binding.tvManageCategoriesTitle.setText("View Categories");
         binding.cardManageShares.setClickable(false);
@@ -172,11 +172,12 @@ public class TodoEditorFragment extends Fragment {
                     R.id.action_todoEditorFragment_to_manageCategoriesFragment, args);
         });
         binding.cardManageShares.setOnClickListener(v -> {
-            Bundle args = new Bundle();
-            List<TodoShareResponse> currentShares = viewModel.getShares().getValue();
-            if (currentShares != null) {
-                args.putString("sharesJson", gson.toJson(currentShares));
+            if (viewModel.getTodoId() == null) {
+                Toast.makeText(requireContext(), "Please save the Todo first before managing shares.", Toast.LENGTH_SHORT).show();
+                return;
             }
+            Bundle args = new Bundle();
+            args.putLong("todoId", viewModel.getTodoId());
             Navigation.findNavController(v).navigate(
                     R.id.action_todoEditorFragment_to_manageSharesFragment, args);
         });
@@ -281,9 +282,15 @@ public class TodoEditorFragment extends Fragment {
                 if (todo.getCategories() != null) {
                     viewModel.setCategories(new HashSet<>(todo.getCategories()));
                 }
-                if (todo.getAccessLevel() != null && todo.getAccessLevel() == AccessLevel.READ.getValue()) {
-                    viewModel.setCanEdit(false);
-                    disableEditing();
+                if (todo.getAccessLevel() != null) {
+                    if (todo.getAccessLevel() == AccessLevel.READ.getValue()) {
+                        viewModel.setCanEdit(false);
+                        viewModel.setCanDelete(false);
+                        disableEditing();
+                    } else if (todo.getAccessLevel() == AccessLevel.WRITE.getValue()) {
+                        viewModel.setCanDelete(false);
+                        binding.btnDelete.setEnabled(false);
+                    }
                 }
                 viewModel.loadShares(viewModel.getTodoId());
                 viewModel.clearLoadedTodo();
