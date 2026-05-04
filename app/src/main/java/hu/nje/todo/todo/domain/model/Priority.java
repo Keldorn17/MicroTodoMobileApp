@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum Priority {
-    NO_PRIORITY(0, "No Priority"),
+    NO_PRIORITY(0, "Not required"),
     LOW(1, "Low"),
     NORMAL(2, "Normal"),
     HIGH(3, "High"),
