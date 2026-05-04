@@ -34,9 +34,6 @@ public class TodoListFragment extends Fragment {
     private TodoListViewModel viewModel;
     private TodoAdapter adapter;
 
-    @Inject
-    Gson gson;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

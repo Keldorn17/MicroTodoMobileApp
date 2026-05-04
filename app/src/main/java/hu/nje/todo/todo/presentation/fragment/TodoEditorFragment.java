@@ -50,8 +50,6 @@ public class TodoEditorFragment extends Fragment {
     private FragmentTodoEditorBinding binding;
     private TodoEditorViewModel viewModel;
 
-    @Inject
-    Gson gson;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
