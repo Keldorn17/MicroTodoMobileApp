@@ -8,7 +8,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.data.BarData;
+
 import dagger.hilt.android.AndroidEntryPoint;
+import hu.nje.todo.R;
 import hu.nje.todo.databinding.FragmentStatisticsBarBinding;
 import hu.nje.todo.todo.presentation.util.ChartStyleHelper;
 import hu.nje.todo.todo.presentation.viewmodel.StatisticsViewModel;
@@ -24,8 +29,18 @@ public class BarChartFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentStatisticsBarBinding.inflate(inflater, container, false);
 
-        ChartStyleHelper.applyGroupedBarChartStyle(requireContext(), binding.barChartGeneral);
-        ChartStyleHelper.applyStackedBarChartStyle(requireContext(), binding.barChartPriorities);
+        ChartStyleHelper.applyGroupedBarChartStyle(binding.barChartGeneral,
+                new String[]{
+                        getString(R.string.label_own),
+                        getString(R.string.label_shared),
+                        getString(R.string.label_total)});
+        ChartStyleHelper.applyStackedBarChartStyle(binding.barChartPriorities,
+                new String[]{
+                        getString(R.string.label_not_required),
+                        getString(R.string.label_low),
+                        getString(R.string.label_normal),
+                        getString(R.string.label_high),
+                        getString(R.string.label_critical)});
 
         return binding.getRoot();
     }
@@ -35,32 +50,25 @@ public class BarChartFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(requireParentFragment()).get(StatisticsViewModel.class);
 
-        viewModel.getGroupedBarData().observe(getViewLifecycleOwner(), data -> {
-            if (data == null || data.getYMax() <= 0) {
-                binding.barChartGeneral.setVisibility(View.INVISIBLE);
-                binding.tvNoGeneralBarData.setVisibility(View.VISIBLE);
-            } else {
-                binding.barChartGeneral.setVisibility(View.VISIBLE);
-                binding.tvNoGeneralBarData.setVisibility(View.GONE);
-
-                binding.barChartGeneral.setData(data);
+        viewModel.getGroupedBarData().observe(getViewLifecycleOwner(), data ->{
+                updatePieVisibility(binding.barChartGeneral, binding.tvNoGeneralBarData, data);
                 binding.barChartGeneral.groupBars(0f, 0.1f, 0.02f);
-                binding.barChartGeneral.invalidate();
-            }
         });
 
-        viewModel.getStackedBarData().observe(getViewLifecycleOwner(), data -> {
-            if (data == null || data.getYMax() <= 0) {
-                binding.barChartPriorities.setVisibility(View.INVISIBLE);
-                binding.tvNoPriorityData.setVisibility(View.VISIBLE);
-            } else {
-                binding.barChartPriorities.setVisibility(View.VISIBLE);
-                binding.tvNoPriorityData.setVisibility(View.GONE);
+        viewModel.getStackedBarData().observe(getViewLifecycleOwner(), data ->
+                updatePieVisibility(binding.barChartPriorities, binding.tvNoPriorityData, data));
+    }
 
-                binding.barChartPriorities.setData(data);
-                binding.barChartPriorities.invalidate();
-            }
-        });
+    private void updatePieVisibility(BarChart chart, View emptyView, BarData data) {
+        if (data == null || data.getEntryCount() == 0) {
+            chart.setVisibility(View.INVISIBLE);
+            emptyView.setVisibility(View.VISIBLE);
+        } else {
+            chart.setVisibility(View.VISIBLE);
+            emptyView.setVisibility(View.GONE);
+            chart.setData(data);
+            chart.invalidate();
+        }
     }
 
     @Override
