@@ -1,6 +1,5 @@
 package hu.nje.todo.todo.presentation.util;
 
-import android.content.Context;
 import android.graphics.Color;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -35,8 +34,9 @@ public class ChartStyleHelper {
         chart.setMarker(new ChartMarkerView(chart.getContext(), R.layout.layout_chart_marker));
     }
 
-    public static void applyGroupedBarChartStyle(Context context, BarChart chart) {
+    public static void applyGroupedBarChartStyle(BarChart chart, String[] texts) {
         int textColor = MaterialColors.getColor(chart, com.google.android.material.R.attr.colorOnSurface);
+
 
         chart.getDescription().setEnabled(false);
         chart.getLegend().setEnabled(false);
@@ -54,11 +54,7 @@ public class ChartStyleHelper {
         xAxis.setAxisMinimum(0f);
         xAxis.setAxisMaximum(3f);
 
-        xAxis.setValueFormatter(new IndexAxisValueFormatter(new String[]{
-                context.getString(R.string.label_own),
-                context.getString(R.string.label_shared),
-                context.getString(R.string.label_total)
-        }));
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(texts));
 
         YAxis leftAxis = chart.getAxisLeft();
         leftAxis.setTextColor(textColor);
@@ -68,9 +64,10 @@ public class ChartStyleHelper {
         leftAxis.enableGridDashedLine(10f, 10f, 0f);
         leftAxis.setDrawAxisLine(false);
         chart.getAxisRight().setEnabled(false);
+
     }
 
-    public static void applyStackedBarChartStyle(Context context, BarChart chart) {
+    public static void applyStackedBarChartStyle(BarChart chart, String[] texts) {
         int textColor = MaterialColors.getColor(chart, com.google.android.material.R.attr.colorOnSurface);
 
         chart.getDescription().setEnabled(false);
@@ -86,7 +83,7 @@ public class ChartStyleHelper {
         xAxis.setDrawAxisLine(true);
         xAxis.setAxisLineColor(textColor);
 
-        xAxis.setValueFormatter(new IndexAxisValueFormatter(new String[]{"Not\nRequired", "Low", "Normal", "High", "Critical"}));
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(texts));
 
         xAxis.setGranularity(1f);
         xAxis.setLabelCount(5);

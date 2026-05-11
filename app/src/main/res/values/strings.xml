@@ -14,6 +14,11 @@
     <string name="statistics_no_own_todos">No own todos to analyze</string>
     <string name="statistics_no_shared_todos">No shared todos yet</string>
     <string name="label_own">Own</string>
+    <string name="label_not_required">Not\nRequired</string>
+    <string name="label_low">Low</string>
+    <string name="label_normal">Normal</string>
+    <string name="label_high">High</string>
+    <string name="label_critical">Critical</string>
     <string name="label_shared">Shared</string>
     <string name="label_finished">Finished</string>
     <string name="label_unfinished">Unfinished</string>
